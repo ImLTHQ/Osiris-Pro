@@ -1,0 +1,80 @@
+# Injector
+
+命令行手动映射（Manual Map）DLL 注入器，目标进程 `cs2.exe`（x64）。
+不调用 `LoadLibrary`：模块通过手写 PE 装载流程映射进目标进程，
+不会出现在目标进程的 PEB 模块列表里。
+
+## 两种使用模式
+
+| 模式 | 命令 | 说明 |
+|---|---|---|
+| 内置 DLL（运行即注入） | `Injector.exe` | 使用编译时嵌入的 `Osiris.dll`，直接注入 cs2.exe |
+| 独立 DLL | `Injector.exe path\to\module.dll` | 注入任意 x64 DLL |
+
+## 编译（Release x64，静默无窗口）
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File Injector\build_injector.ps1
+```
+
+脚本依次执行：
+1. MSBuild 编译 `Osiris.sln`（Release x64）→ `x64\Release\Osiris.dll`
+2. 把 DLL 二进制转成 `EmbeddedDll.h`（字节数组）
+3. MSBuild 编译 `Injector.vcxproj` → `Injector\x64\Release\Injector.exe`
+
+产物：
+- `Injector\x64\Release\Injector.exe`（内置 DLL 版 + 独立 DLL 版二合一）
+- 编译日志：`Injector\build_osiris.log`、`Injector\build_injector.log`
+
+## GitHub Actions 云端编译（推荐，零本地安装）
+
+`windows.yml` 的 msbuild 任务现在会一次性产出两个文件并上传为 artifact：
+- `Osiris.dll`
+- `Injector.exe`（已内置对应配置的 Osiris.dll，运行即注入）
+
+推送/手动触发后，在 Actions 页面 → 对应任务 → **Artifacts** 下载
+`Osiris-Release-MSVC-windows-2022`（zip 内含上述两个文件）。
+
+本地跑 `build_injector.ps1` 与 CI 是同一套流程（`generate_embedded.ps1` 共用）。
+
+## 命令行参数
+
+```
+Injector.exe                           注入内置 Osiris.dll 到 cs2.exe
+Injector.exe <module.dll>              注入指定的 DLL 到 cs2.exe
+Injector.exe --pid <pid> [module.dll]  指定目标进程 id
+Injector.exe --list                    列出当前运行的 cs2.exe 进程
+Injector.exe --help                    显示帮助
+```
+
+## 原理
+
+1. 解析 PE 头（校验 x64 / PE32+），按 `SizeOfImage` 在目标进程内
+   `VirtualAllocEx` 分配 RWX 内存（优先镜像首选基址，失败则任意地址）。
+2. 注入器本地按 VA 对齐重建镜像（头 + 各节），写入目标进程。
+3. 若实际基址 ≠ 首选基址，应用 `.reloc` 重定位（DIR64 / HIGHLOW）。
+4. 组装参数块 + 位置无关载荷（`Shellcode.asm`，PIC，无重定位），写入目标。
+5. `CreateRemoteThread` 在目标内执行载荷：
+   - 经 `ntdll!LdrLoadDll` / `LdrGetProcedureAddress` 在目标进程内解析导入表
+     （与 LoadLibrary 等效，保证地址正确）；
+   - 注册异常目录（`RtlAddFunctionTable`，x64 SEH）；
+   - 调用 TLS 回调；
+   - 调用入口点（`DllMain`，DLL_PROCESS_ATTACH）。
+6. 读取载荷返回状态，清理载荷内存，保留映射后的镜像。
+
+## 注意事项
+
+- **管理员权限**：若 `OpenProcess` 被拒绝，请以管理员身份运行。
+- **反作弊风险**：CS2 带有 VAC，注入行为可能被检测。仅用于学习和自用测试。
+- 被映射的 DLL 入口点（DllMain）返回 `FALSE` 时注入器会报失败并释放镜像。
+- 载荷超时（60 秒）视为失败，防止 DllMain 卡死时注入器悬挂。
+
+## 文件
+
+| 文件 | 说明 |
+|---|---|
+| `Injector.cpp` | CLI 入口、进程查找、双模式 |
+| `ManualMapper.cpp/.h` | PE 解析、重定位、导入解析、载荷组装 |
+| `Shellcode.asm` | 目标进程内执行的 PIC 载荷（MASM x64） |
+| `EmbeddedDll.h` | 生成文件：内置 DLL 字节数组（勿手改） |
+| `build_injector.ps1` | 静默构建脚本 |

@@ -42,14 +42,22 @@ jobs:
     - name: Set toolset
       if: matrix.toolset == 'ClangCL'
       run: echo "toolset=/p:PlatformToolset=${{ matrix.toolset }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-    - name: Build
+    - name: Build Osiris.dll
       shell: cmd
       run: msbuild Osiris.sln /p:Platform=x64 /p:Configuration=${{ matrix.configuration }} ${{ env.toolset }}
-    - name: Upload DLL artifact
+    - name: Generate embedded DLL header
+      shell: pwsh
+      run: powershell -NoProfile -ExecutionPolicy Bypass -File Injector\generate_embedded.ps1 -Configuration ${{ matrix.configuration }}
+    - name: Build Injector.exe (embedded DLL)
+      shell: cmd
+      run: msbuild Injector\Injector.vcxproj /p:Platform=x64 /p:Configuration=${{ matrix.configuration }} ${{ env.toolset }}
+    - name: Upload artifacts (DLL + injector)
       uses: actions/upload-artifact@v4
       with:
         name: Osiris-${{ matrix.configuration }}-${{ matrix.toolset }}-${{ matrix.os }}
-        path: x64\${{ matrix.configuration }}\Osiris.dll
+        path: |
+          x64\${{ matrix.configuration }}\Osiris.dll
+          Injector\x64\${{ matrix.configuration }}\Injector.exe
         if-no-files-found: error
 
   cmake:

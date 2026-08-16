@@ -51,13 +51,17 @@ jobs:
     - name: Build Injector.exe (embedded DLL)
       shell: cmd
       run: msbuild Injector\Injector.vcxproj /p:Platform=x64 /p:Configuration=${{ matrix.configuration }} ${{ env.toolset }}
+    - name: Stage artifacts (flat, no folders in the zip)
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory -Force -Path staging | Out-Null
+        Copy-Item "x64\${{ matrix.configuration }}\Osiris.dll" -Destination staging
+        Copy-Item "Injector\x64\${{ matrix.configuration }}\Injector.exe" -Destination staging
     - name: Upload artifacts (DLL + injector)
       uses: actions/upload-artifact@v5
       with:
         name: Osiris-${{ matrix.configuration }}-${{ matrix.toolset }}-${{ matrix.os }}
-        path: |
-          x64\${{ matrix.configuration }}\Osiris.dll
-          Injector\x64\${{ matrix.configuration }}\Injector.exe
+        path: staging/*
         if-no-files-found: error
 
   cmake:

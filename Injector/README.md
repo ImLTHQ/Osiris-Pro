@@ -10,7 +10,8 @@
 
 ```
 双击运行
-  -> 非管理员则自动弹出 UAC 提权（拒绝则中止，不加载任何模块）
+  -> 程序内嵌"以管理员身份运行"属性（manifest: requireAdministrator），
+     双击直接弹 UAC 授权框，无需右键"以管理员身份运行"；拒绝则中止不加载
   -> 查找 cs2.exe：
       已运行   -> 等待 client.dll 加载后立即注入（避免弹窗阶段过早注入）
       未运行   -> 通过 Steam 启动 CS2（steam://rungameid/730）
@@ -62,7 +63,9 @@ powershell -ExecutionPolicy Bypass -File Injector\generate_embedded.ps1 -DllPath
 - `Injector.exe`（已内置对应配置的 Osiris.dll，运行即注入）
 
 推送/手动触发后，在 Actions 页面 → 对应任务 → **Artifacts** 下载
-`Osiris-Release-MSVC-windows-2022`（zip 内含上述两个文件）。
+`Osiris-Release-MSVC-windows-2022`。**zip 内不套文件夹**，直接是目标文件：
+- `Osiris.dll`
+- `Injector.exe`（已内置对应配置的 Osiris.dll，运行即注入）
 
 本地跑 `build_injector.ps1` 与 CI 是同一套流程（`generate_embedded.ps1` 共用）。
 

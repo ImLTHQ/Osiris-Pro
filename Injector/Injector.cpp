@@ -308,7 +308,7 @@ int wmain() {
     }
 
     // ---- embedded module ----
-    if (kEmbeddedDllSize == 0) {
+    if constexpr (kEmbeddedDllSize == 0) {
         std::wprintf(L"[!] no embedded DLL (rebuild via build_injector.ps1).\n");
         CloseHandle(hProc);
         PauseOnExit();

@@ -11,8 +11,12 @@
 ```
 双击运行
   -> 非管理员则自动弹出 UAC 提权（拒绝则中止，不加载任何模块）
-  -> 自动找到 cs2.exe
-  -> 自动注入内置的 Osiris.dll
+  -> 查找 cs2.exe：
+      已运行   -> 直接注入
+      未运行   -> 通过 Steam 启动 CS2（steam://rungameid/730）
+                 等待 cs2.exe 出现（最长 5 分钟）
+                 等待游戏窗口获得用户焦点（最长 15 分钟）
+  -> 注入内置的 Osiris.dll
   -> 窗口保持显示结果（按任意键关闭）
 ```
 
@@ -58,10 +62,10 @@ powershell -ExecutionPolicy Bypass -File Injector\generate_embedded.ps1 -DllPath
 
 | 变量 | 效果 |
 |---|---|
-| `INJECTOR_NO_ELEVATE=1` | 跳过 UAC 提权（用于自动化测试；正常使用不设置） |
-Injector.exe --list                    列出当前运行的 cs2.exe 进程
-Injector.exe --help                    显示帮助
-```
+| `INJECTOR_NO_ELEVATE=1` | 跳过 UAC 提权（自动化测试用；正常使用不设置） |
+| `INJECTOR_TARGET_EXE=<名>` | 覆盖目标进程名（默认 `cs2.exe`，测试用） |
+| `INJECTOR_NO_LAUNCH=1` | 目标不存在时不执行 Steam 启动，只等待 |
+| `INJECTOR_DRY_RUN=1` | 走完全流程但跳过真正注入 |
 
 ## 原理
 

@@ -85,6 +85,101 @@ HANDLE OpenTarget(DWORD pid) {
                        FALSE, pid);
 }
 
+// Target process name (default cs2.exe; INJECTOR_TARGET_EXE overrides for testing).
+const wchar_t* TargetExe() {
+    static wchar_t buf[64] = {};
+    if (buf[0] == L'\0') {
+        if (GetEnvironmentVariableW(L"INJECTOR_TARGET_EXE", buf, 64) == 0 ||
+            buf[0] == L'\0')
+            wcscpy_s(buf, L"cs2.exe");
+    }
+    return buf;
+}
+
+// Dev hooks (invisible to normal users).
+bool EnvFlag(const wchar_t* name) {
+    wchar_t v[2] = {};
+    return GetEnvironmentVariableW(name, v, 2) > 0 && v[0] == L'1';
+}
+
+// Returns the pid of the first running target process, or 0 if none.
+DWORD FindTarget() {
+    const auto procs = mm::FindProcessesByName(TargetExe());
+    if (procs.size() > 1)
+        std::wprintf(L"[!] multiple %ls processes; using the first (pid %lu).\n",
+                     TargetExe(), procs.front().pid);
+    return procs.empty() ? 0 : procs.front().pid;
+}
+
+// Launches the target. For cs2.exe this goes through Steam (steam://rungameid/730).
+bool LaunchTarget() {
+    if (EnvFlag(L"INJECTOR_NO_LAUNCH")) {
+        std::wprintf(L"[*] launch skipped (INJECTOR_NO_LAUNCH=1); waiting for %ls...\n",
+                     TargetExe());
+        return true;
+    }
+    if (_wcsicmp(TargetExe(), L"cs2.exe") == 0) {
+        std::wprintf(L"[*] %ls not found; launching CS2 via Steam (steam://rungameid/730)...\n",
+                     TargetExe());
+        const HINSTANCE r = ShellExecuteW(nullptr, L"open", L"steam://rungameid/730",
+                                          nullptr, nullptr, SW_SHOWNORMAL);
+        return reinterpret_cast<std::intptr_t>(r) > 32;
+    }
+    std::wprintf(L"[*] %ls not found; waiting for it to start...\n", TargetExe());
+    return true;
+}
+
+// Polls for the target process until it appears or the timeout expires.
+DWORD WaitForProcess(DWORD timeoutMs) {
+    const DWORD t0 = GetTickCount();
+    DWORD lastStatus = 0;
+    for (;;) {
+        if (const DWORD pid = FindTarget())
+            return pid;
+        const DWORD elapsed = GetTickCount() - t0;
+        if (elapsed >= timeoutMs)
+            return 0;
+        if (elapsed - lastStatus >= 5000) {
+            lastStatus = elapsed;
+            std::wprintf(L"[*] waiting for %ls to start... (%u s)\n", TargetExe(),
+                         elapsed / 1000);
+        }
+        Sleep(500);
+    }
+}
+
+// True when the foreground window belongs to the target pid and is visible,
+// i.e. the user has the game focused / is interacting with it.
+bool IsForeground(DWORD pid) {
+    const HWND fg = GetForegroundWindow();
+    if (!fg)
+        return false;
+    DWORD fgPid = 0;
+    GetWindowThreadProcessId(fg, &fgPid);
+    return fgPid == pid && IsWindowVisible(fg);
+}
+
+// Waits until the game window is focused by the user (or the timeout expires).
+bool WaitForFocus(DWORD pid, DWORD timeoutMs) {
+    std::wprintf(L"[*] waiting for the game window to appear and receive focus...\n");
+    const DWORD t0 = GetTickCount();
+    DWORD lastStatus = 0;
+    for (;;) {
+        if (IsForeground(pid)) {
+            std::wprintf(L"[+] game window is in focus.\n");
+            return true;
+        }
+        const DWORD elapsed = GetTickCount() - t0;
+        if (elapsed >= timeoutMs)
+            return false;
+        if (elapsed - lastStatus >= 5000) {
+            lastStatus = elapsed;
+            std::wprintf(L"[*] waiting for focus... (%u s)\n", elapsed / 1000);
+        }
+        Sleep(500);
+    }
+}
+
 }  // namespace
 
 int wmain() {
@@ -98,17 +193,43 @@ int wmain() {
         return rc;
     }
 
-    // ---- locate target ----
-    const auto procs = mm::FindProcessesByName(L"cs2.exe");
-    if (procs.empty()) {
-        std::wprintf(L"[!] cs2.exe not running. Start the game and run again.\n");
-        PauseOnExit();
-        return 2;
+    // ---- find the target; if missing, launch it via Steam and wait ----
+    constexpr DWORD kProcessWaitMs = 5 * 60 * 1000;   // 5 minutes to start
+    constexpr DWORD kFocusWaitMs = 15 * 60 * 1000;    // 15 minutes for user focus
+
+    DWORD pid = FindTarget();
+    if (pid == 0) {
+        if (!LaunchTarget()) {
+            std::wprintf(L"[!] failed to launch %ls (Steam not available?).\n", TargetExe());
+            PauseOnExit();
+            return 4;
+        }
+        pid = WaitForProcess(kProcessWaitMs);
+        if (pid == 0) {
+            std::wprintf(L"[!] %ls did not start within 5 minutes; aborting.\n", TargetExe());
+            PauseOnExit();
+            return 4;
+        }
+        std::wprintf(L"[+] %ls started (pid %lu).\n", TargetExe(), pid);
+
+        // Only inject once the user has the game window focused.
+        if (!WaitForFocus(pid, kFocusWaitMs)) {
+            std::wprintf(L"[!] game window never received focus within 15 minutes; aborting.\n");
+            PauseOnExit();
+            return 4;
+        }
+        std::wprintf(L"[*] injecting now...\n");
+    } else {
+        std::wprintf(L"[*] target: %ls already running (pid %lu); injecting immediately.\n",
+                     TargetExe(), pid);
     }
-    const DWORD pid = procs.front().pid;
-    if (procs.size() > 1)
-        std::wprintf(L"[!] multiple cs2.exe processes; using the first (pid %lu).\n", pid);
-    std::wprintf(L"[*] target: cs2.exe (pid %lu)\n", pid);
+
+    // ---- dev hook: dry run ----
+    if (EnvFlag(L"INJECTOR_DRY_RUN")) {
+        std::wprintf(L"[!] DRY RUN (INJECTOR_DRY_RUN=1): skipping injection.\n");
+        PauseOnExit();
+        return 0;
+    }
 
     // ---- open target with injection rights ----
     HANDLE hProc = OpenTarget(pid);

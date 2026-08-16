@@ -9,6 +9,8 @@
 
 #include <windows.h>
 #include <tlhelp32.h>
+#include <shellapi.h>
+#include <conio.h>
 
 #include <cstdio>
 #include <string>
@@ -18,6 +20,76 @@
 #include "ManualMapper.h"
 
 namespace {
+
+// True when the current process runs with a full administrator token.
+bool IsElevated() {
+    HANDLE token = nullptr;
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token))
+        return false;
+    TOKEN_ELEVATION elev = {};
+    DWORD size = 0;
+    const BOOL ok = GetTokenInformation(token, TokenElevation, &elev, sizeof(elev), &size);
+    CloseHandle(token);
+    return ok && elev.TokenIsElevated;
+}
+
+// True when stdin is an interactive console (false when output is redirected,
+// e.g. from a script or CI — in that case we must not block on key input).
+bool ConsoleInteractive() {
+    const HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
+    if (in == INVALID_HANDLE_VALUE || in == nullptr)
+        return false;
+    DWORD mode = 0;
+    return GetConsoleMode(in, &mode) != FALSE;
+}
+
+// Keeps the console window open after finishing (double-click scenario).
+void PauseOnExit() {
+    if (!ConsoleInteractive())
+        return;
+    std::wprintf(L"\nPress any key to continue...");
+    fflush(stdout);
+    _getwch();
+    fflush(stdout);
+}
+
+// Elevation gate. Returns:
+//   1  - already elevated, continue in this process
+//   0  - elevation was granted; the elevated child process does the work,
+//        this (parent) instance must exit without loading anything
+//  -1  - elevation was denied; caller must abort WITHOUT loading the module
+int EnsureElevated(int argc, wchar_t** argv) {
+    if (IsElevated())
+        return 1;
+
+    std::wprintf(L"[*] not running as administrator; requesting elevation...\n");
+    wchar_t exePath[MAX_PATH] = {};
+    GetModuleFileNameW(nullptr, exePath, MAX_PATH);
+
+    std::wstring cmdline;
+    for (int i = 1; i < argc; ++i) {
+        if (i > 1)
+            cmdline += L' ';
+        const std::wstring a = argv[i];
+        if (a.find(L' ') != std::wstring::npos) {
+            cmdline += L'"';
+            cmdline += a;
+            cmdline += L'"';
+        } else {
+            cmdline += a;
+        }
+    }
+
+    const HINSTANCE result = ShellExecuteW(nullptr, L"runas", exePath,
+                                           cmdline.empty() ? nullptr : cmdline.c_str(),
+                                           nullptr, SW_SHOWNORMAL);
+    if (reinterpret_cast<std::intptr_t>(result) <= 32) {
+        std::wprintf(L"[!] elevation was denied; injection aborted (no module loaded).\n");
+        return -1;
+    }
+    std::wprintf(L"[+] elevation accepted; the elevated instance continues in a new window.\n");
+    return 0;
+}
 
 void PrintUsage() {
     std::wprintf(
@@ -32,8 +104,10 @@ void PrintUsage() {
         L"\n"
         L"Notes:\n"
         L"  - The module is manual-mapped (no LoadLibrary / no PEB module entry).\n"
-        L"  - Run as administrator if OpenProcess is denied.\n"
-        L"  - If no DLL path is given, the DLL embedded at build time is used.\n");
+        L"  - If not running as administrator, the injector self-elevates via UAC;\n"
+        L"    if elevation is denied, nothing is loaded.\n"
+        L"  - If no DLL path is given, the DLL embedded at build time is used.\n"
+        L"  - Osiris saves its config to %%APPDATA%%\\OsirisCS2\\configs\\default.cfg\n");
 }
 
 bool ReadFileBytes(const wchar_t* path, std::vector<std::uint8_t>& out) {
@@ -68,7 +142,7 @@ HANDLE OpenTarget(DWORD pid) {
 
 }  // namespace
 
-int wmain(int argc, wchar_t** argv) {
+int Run(int argc, wchar_t** argv) {
     std::wstring dllPath;
     DWORD pidOverride = 0;
     bool listOnly = false;
@@ -106,6 +180,12 @@ int wmain(int argc, wchar_t** argv) {
         }
         return 0;
     }
+
+    // ---- elevation gate (injection path only) ----
+    // Insufficient rights -> request elevation; if denied, abort WITHOUT loading.
+    const int elev = EnsureElevated(argc, argv);
+    if (elev <= 0)
+        return elev == 0 ? 0 : 3;
 
     // ---- locate target ----
     DWORD pid = pidOverride;
@@ -156,10 +236,18 @@ int wmain(int argc, wchar_t** argv) {
     if (mm::ManualMap(hProc, bytes.data(), bytes.size(), error)) {
         std::wprintf(L"[+] success: module mapped into pid %lu (%lu ms)\n", pid,
                      GetTickCount() - t0);
+        if (dllPath.empty())
+            std::wprintf(L"[*] Osiris saves its config to %%APPDATA%%\\OsirisCS2\\configs\\default.cfg\n");
         CloseHandle(hProc);
         return 0;
     }
     std::wprintf(L"[!] manual map failed: %ls\n", error.c_str());
     CloseHandle(hProc);
     return 5;
+}
+
+int wmain(int argc, wchar_t** argv) {
+    const int rc = Run(argc, argv);
+    PauseOnExit();
+    return rc;
 }

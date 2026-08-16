@@ -64,10 +64,27 @@ Injector.exe --help                    显示帮助
 
 ## 注意事项
 
-- **管理员权限**：若 `OpenProcess` 被拒绝，请以管理员身份运行。
+- **自动提权（UAC）**：非管理员运行时，注入器会通过 UAC 自动申请提权并重新启动
+  自身（保留全部命令行参数）。**提权被拒绝时直接中止，不会加载任何模块。**
+- **权限不足不加载**：即使已提权，若 `OpenProcess` 目标进程仍被拒绝（受保护进程等），
+  同样中止，不会执行注入。
+- **窗口保持**：交互式控制台运行结束后会停在 "Press any key to continue..."，
+  窗口不会自动关闭；输出被重定向（脚本/CI）时自动跳过等待。
 - **反作弊风险**：CS2 带有 VAC，注入行为可能被检测。仅用于学习和自用测试。
 - 被映射的 DLL 入口点（DllMain）返回 `FALSE` 时注入器会报失败并释放镜像。
 - 载荷超时（60 秒）视为失败，防止 DllMain 卡死时注入器悬挂。
+
+## Osiris 参数（配置）保存位置
+
+Osiris.dll 的配置保存在系统 AppData（Roaming）目录：
+
+```
+%APPDATA%\OsirisCS2\configs\default.cfg
+```
+
+展开后通常为 `C:\Users\<用户名>\AppData\Roaming\OsirisCS2\configs\default.cfg`。
+- 写入方式：先写临时文件 `default.cfg.new`，再原子重命名覆盖 `default.cfg`
+- 游戏内修改配置后自动保存；注入器在成功注入后会打印该路径
 
 ## 文件
 

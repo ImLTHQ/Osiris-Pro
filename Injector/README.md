@@ -1,15 +1,22 @@
 # Injector
 
-命令行手动映射（Manual Map）DLL 注入器，目标进程 `cs2.exe`（x64）。
+手动映射（Manual Map）DLL 注入器，目标进程 `cs2.exe`（x64）。
 不调用 `LoadLibrary`：模块通过手写 PE 装载流程映射进目标进程，
 不会出现在目标进程的 PEB 模块列表里。
 
-## 两种使用模式
+## 使用（小白版：零参数）
 
-| 模式 | 命令 | 说明 |
-|---|---|---|
-| 内置 DLL（运行即注入） | `Injector.exe` | 使用编译时嵌入的 `Osiris.dll`，直接注入 cs2.exe |
-| 独立 DLL | `Injector.exe path\to\module.dll` | 注入任意 x64 DLL |
+**双击 `Injector.exe` 即可**，全自动流程：
+
+```
+双击运行
+  -> 非管理员则自动弹出 UAC 提权（拒绝则中止，不加载任何模块）
+  -> 自动找到 cs2.exe
+  -> 自动注入内置的 Osiris.dll
+  -> 窗口保持显示结果（按任意键关闭）
+```
+
+不需要、也不接受任何命令行参数。控制台输出为诊断日志，供开发者排查问题。
 
 ## 编译（Release x64，静默无窗口）
 
@@ -23,8 +30,18 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File Injector\build_injector.
 3. MSBuild 编译 `Injector.vcxproj` → `Injector\x64\Release\Injector.exe`
 
 产物：
-- `Injector\x64\Release\Injector.exe`（内置 DLL 版 + 独立 DLL 版二合一）
+- `Injector\x64\Release\Injector.exe`（内置当前构建的 Osiris.dll）
 - 编译日志：`Injector\build_osiris.log`、`Injector\build_injector.log`
+
+### 嵌入其它 DLL（开发者调试）
+
+默认嵌入 `x64\Release\Osiris.dll`。想嵌入别的 DLL：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File Injector\generate_embedded.ps1 -DllPath E:\path\to\custom.dll
+```
+
+重新执行第 3 步即可（或直接重跑 `build_injector.ps1`，它会重新嵌入并编译）。
 
 ## GitHub Actions 云端编译（推荐，零本地安装）
 
@@ -37,12 +54,11 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File Injector\build_injector.
 
 本地跑 `build_injector.ps1` 与 CI 是同一套流程（`generate_embedded.ps1` 共用）。
 
-## 命令行参数
+## 开发者调试开关（环境变量，用户无感）
 
-```
-Injector.exe                           注入内置 Osiris.dll 到 cs2.exe
-Injector.exe <module.dll>              注入指定的 DLL 到 cs2.exe
-Injector.exe --pid <pid> [module.dll]  指定目标进程 id
+| 变量 | 效果 |
+|---|---|
+| `INJECTOR_NO_ELEVATE=1` | 跳过 UAC 提权（用于自动化测试；正常使用不设置） |
 Injector.exe --list                    列出当前运行的 cs2.exe 进程
 Injector.exe --help                    显示帮助
 ```
@@ -65,7 +81,7 @@ Injector.exe --help                    显示帮助
 ## 注意事项
 
 - **自动提权（UAC）**：非管理员运行时，注入器会通过 UAC 自动申请提权并重新启动
-  自身（保留全部命令行参数）。**提权被拒绝时直接中止，不会加载任何模块。**
+  自身。**提权被拒绝时直接中止，不会加载任何模块。**
 - **权限不足不加载**：即使已提权，若 `OpenProcess` 目标进程仍被拒绝（受保护进程等），
   同样中止，不会执行注入。
 - **窗口保持**：交互式控制台运行结束后会停在 "Press any key to continue..."，
@@ -90,7 +106,7 @@ Osiris.dll 的配置保存在系统 AppData（Roaming）目录：
 
 | 文件 | 说明 |
 |---|---|
-| `Injector.cpp` | CLI 入口、进程查找、双模式 |
+| `Injector.cpp` | 零参数入口、自动提权、自动注入、诊断输出 |
 | `ManualMapper.cpp/.h` | PE 解析、重定位、导入解析、载荷组装 |
 | `Shellcode.asm` | 目标进程内执行的 PIC 载荷（MASM x64） |
 | `EmbeddedDll.h` | 生成文件：内置 DLL 字节数组（勿手改） |

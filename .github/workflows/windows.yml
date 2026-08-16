@@ -1,15 +1,40 @@
 name: Windows
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      os:
+        description: 'Windows runner image'
+        type: choice
+        default: windows-2022
+        options:
+          - windows-2022
+          - windows-2025
+      toolset:
+        description: 'Compiler toolset'
+        type: choice
+        default: MSVC
+        options:
+          - MSVC
+          - ClangCL
+      configuration:
+        description: 'Build configuration'
+        type: choice
+        default: Release
+        options:
+          - Debug
+          - Release
 
 jobs:
   msbuild:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2022, windows-2025]
-        toolset: [ClangCL, MSVC]
-        configuration: [Debug, Release]
+        os: ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', inputs.os) || '["windows-2022", "windows-2025"]') }}
+        toolset: ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', inputs.toolset) || '["ClangCL", "MSVC"]') }}
+        configuration: ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', inputs.configuration) || '["Debug", "Release"]') }}
     steps:
     - uses: actions/checkout@v6
     - name: Add msbuild to PATH
@@ -31,9 +56,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2022, windows-2025]
-        toolset: [ClangCL, MSVC]
-        configuration: [Debug, Release]
+        os: ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', inputs.os) || '["windows-2022", "windows-2025"]') }}
+        toolset: ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', inputs.toolset) || '["ClangCL", "MSVC"]') }}
+        configuration: ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', inputs.configuration) || '["Debug", "Release"]') }}
     steps:
     - uses: actions/checkout@v6
     - name: Set toolset

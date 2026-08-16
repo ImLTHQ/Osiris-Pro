@@ -7,24 +7,24 @@
 #   powershell -ExecutionPolicy Bypass -File Injector\dump_modules.ps1
 #   powershell -ExecutionPolicy Bypass -File Injector\dump_modules.ps1 -Pid 1234
 
-param([int]$Pid = 0)
+param([int]$TargetPid = 0)
 
-if ($Pid -eq 0) {
+if ($TargetPid -eq 0) {
     $proc = Get-Process -Name cs2 -ErrorAction SilentlyContinue | Select-Object -First 1
     if (-not $proc) {
         Write-Output 'cs2.exe is not running.'
         exit 1
     }
-    $Pid = $proc.Id
+    $TargetPid = $proc.Id
 }
 
-$proc = Get-Process -Id $Pid -ErrorAction SilentlyContinue
+$proc = Get-Process -Id $TargetPid -ErrorAction SilentlyContinue
 if (-not $proc) {
-    Write-Output "process $Pid not found"
+    Write-Output "process $TargetPid not found"
     exit 1
 }
 
-Write-Output ("PID: $Pid  (" + $proc.ProcessName + ")")
+Write-Output ("PID: $TargetPid  (" + $proc.ProcessName + ")")
 Write-Output ("TOTAL MODULES: " + $proc.Modules.Count)
 Write-Output '=== engine-related modules ==='
 $proc.Modules |

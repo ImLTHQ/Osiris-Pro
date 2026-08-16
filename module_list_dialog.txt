@@ -1,0 +1,76 @@
+TOTAL MODULES: 62
+=== ALL MODULES ===
+
+ModuleName                 FileName                                                                                    
+----------                 --------                                                                                    
+cs2.exe                    C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\game\bin\win64
+                           \cs2.exe                                                                                    
+ntdll.dll                  C:\WINDOWS\SYSTEM32\ntdll.dll                                                               
+KERNEL32.DLL               C:\WINDOWS\System32\KERNEL32.DLL                                                            
+KERNELBASE.dll             C:\WINDOWS\System32\KERNELBASE.dll                                                          
+USER32.dll                 C:\WINDOWS\System32\USER32.dll                                                              
+win32u.dll                 C:\WINDOWS\System32\win32u.dll                                                              
+GDI32.dll                  C:\WINDOWS\System32\GDI32.dll                                                               
+gdi32full.dll              C:\WINDOWS\System32\gdi32full.dll                                                           
+msvcp_win.dll              C:\WINDOWS\System32\msvcp_win.dll                                                           
+ucrtbase.dll               C:\WINDOWS\System32\ucrtbase.dll                                                            
+IMM32.DLL                  C:\WINDOWS\System32\IMM32.DLL                                                               
+gameoverlayrenderer64.dll  C:\Program Files (x86)\Steam\gameoverlayrenderer64.dll                                      
+ADVAPI32.dll               C:\WINDOWS\System32\ADVAPI32.dll                                                            
+msvcrt.dll                 C:\WINDOWS\System32\msvcrt.dll                                                              
+sechost.dll                C:\WINDOWS\System32\sechost.dll                                                             
+RPCRT4.dll                 C:\WINDOWS\System32\RPCRT4.dll                                                              
+ole32.dll                  C:\WINDOWS\System32\ole32.dll                                                               
+combase.dll                C:\WINDOWS\System32\combase.dll                                                             
+OLEAUT32.dll               C:\WINDOWS\System32\OLEAUT32.dll                                                            
+PSAPI.DLL                  C:\WINDOWS\System32\PSAPI.DLL                                                               
+CFGMGR32.dll               C:\WINDOWS\SYSTEM32\CFGMGR32.dll                                                            
+WINMM.dll                  C:\WINDOWS\SYSTEM32\WINMM.dll                                                               
+wintrust.dll               C:\WINDOWS\System32\wintrust.dll                                                            
+CRYPT32.dll                C:\WINDOWS\System32\CRYPT32.dll                                                             
+MSASN1.dll                 C:\WINDOWS\SYSTEM32\MSASN1.dll                                                              
+tier0.dll                  C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\game\bin\win64
+                           \tier0.dll                                                                                  
+WS2_32.dll                 C:\WINDOWS\System32\WS2_32.dll                                                              
+bcrypt.dll                 C:\WINDOWS\SYSTEM32\bcrypt.dll                                                              
+bcryptprimitives.dll       C:\WINDOWS\System32\bcryptprimitives.dll                                                    
+engine2.dll                C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\game\bin\win64
+                           \engine2.dll                                                                                
+steam_api64.dll            C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\game\bin\win64
+                           \steam_api64.dll                                                                            
+SHELL32.dll                C:\WINDOWS\System32\SHELL32.dll                                                             
+steamnetworkingsockets.dll C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\game\bin\win64
+                           \steamnetworkingsockets.dll                                                                 
+IPHLPAPI.DLL               C:\WINDOWS\SYSTEM32\IPHLPAPI.DLL                                                            
+dbghelp.dll                C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\game\bin\win64
+                           \dbghelp.dll                                                                                
+vfbasics.dll               C:\WINDOWS\SYSTEM32\vfbasics.dll                                                            
+vrfcore.dll                C:\WINDOWS\SYSTEM32\vrfcore.dll                                                             
+verifier.dll               C:\WINDOWS\SYSTEM32\verifier.dll                                                            
+vconcomm.dll               C:\Program Files (x86)\Steam\steamapps\common\Counter-Strike Global Offensive\game\bin\win64
+                           \vconcomm.dll                                                                               
+mswsock.dll                C:\WINDOWS\system32\mswsock.dll                                                             
+steamclient64.dll          C:\Program Files (x86)\Steam\steamclient64.dll                                              
+SHLWAPI.dll                C:\WINDOWS\System32\SHLWAPI.dll                                                             
+imagehlp.dll               C:\WINDOWS\System32\imagehlp.dll                                                            
+SETUPAPI.dll               C:\WINDOWS\System32\SETUPAPI.dll                                                            
+VERSION.dll                C:\WINDOWS\SYSTEM32\VERSION.dll                                                             
+tier0_s64.dll              C:\Program Files (x86)\Steam\tier0_s64.dll                                                  
+vstdlib_s64.dll            C:\Program Files (x86)\Steam\vstdlib_s64.dll                                                
+Secur32.dll                C:\WINDOWS\SYSTEM32\Secur32.dll                                                             
+SSPICLI.DLL                C:\WINDOWS\SYSTEM32\SSPICLI.DLL                                                             
+shcore.dll                 C:\WINDOWS\System32\shcore.dll                                                              
+CRYPTBASE.DLL              C:\WINDOWS\SYSTEM32\CRYPTBASE.DLL                                                           
+crashhandler64.dll         C:\Program Files (x86)\Steam\crashhandler64.dll                                             
+WININET.dll                C:\WINDOWS\SYSTEM32\WININET.dll                                                             
+uxtheme.dll                C:\WINDOWS\system32\uxtheme.dll                                                             
+MSCTF.dll                  C:\WINDOWS\System32\MSCTF.dll                                                               
+IconCodecService.dll       C:\WINDOWS\system32\IconCodecService.dll                                                    
+WindowsCodecs.dll          C:\WINDOWS\SYSTEM32\WindowsCodecs.dll                                                       
+kernel.appcore.dll         C:\WINDOWS\SYSTEM32\kernel.appcore.dll                                                      
+textinputframework.dll     C:\WINDOWS\SYSTEM32\textinputframework.dll                                                  
+CoreMessaging.dll          C:\WINDOWS\SYSTEM32\CoreMessaging.dll                                                       
+CoreUIComponents.dll       C:\WINDOWS\SYSTEM32\CoreUIComponents.dll                                                    
+wintypes.dll               C:\WINDOWS\SYSTEM32\wintypes.dll                                                            
+
+

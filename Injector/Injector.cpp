@@ -184,6 +184,25 @@ bool GameEngineLoaded(DWORD pid) {
     return found;
 }
 
+// Waits until the game client (client.dll) is loaded in the target.
+bool WaitForClientLoaded(DWORD pid, DWORD timeoutMs) {
+    const DWORD t0 = GetTickCount();
+    DWORD lastStatus = 0;
+    for (;;) {
+        if (GameEngineLoaded(pid))
+            return true;
+        const DWORD elapsed = GetTickCount() - t0;
+        if (elapsed >= timeoutMs)
+            return false;
+        if (elapsed - lastStatus >= 5000) {
+            lastStatus = elapsed;
+            std::wprintf(L"[*] waiting for the game client (client.dll)... (%u s)\n",
+                         elapsed / 1000);
+        }
+        Sleep(500);
+    }
+}
+
 // Waits until the user has the game window focused AND the game engine is
 // loaded (or the timeout expires).
 bool WaitForFocus(DWORD pid, DWORD timeoutMs) {
@@ -259,8 +278,16 @@ int wmain() {
         }
         std::wprintf(L"[*] injecting now...\n");
     } else {
-        std::wprintf(L"[*] target: %ls already running (pid %lu); injecting immediately.\n",
-                     TargetExe(), pid);
+        std::wprintf(L"[*] target: %ls already running (pid %lu).\n", TargetExe(), pid);
+        // Also gate the already-running path: if the game is still at the
+        // region-select dialog, client.dll is not loaded yet - wait for it
+        // instead of injecting too early.
+        if (!WaitForClientLoaded(pid, kProcessWaitMs)) {
+            std::wprintf(L"[!] game client (client.dll) did not load within 5 minutes; aborting.\n");
+            PauseOnExit();
+            return 4;
+        }
+        std::wprintf(L"[*] game client loaded; injecting immediately.\n");
     }
 
     // ---- dev hook: dry run ----

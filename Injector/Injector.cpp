@@ -148,57 +148,23 @@ DWORD WaitForProcess(DWORD timeoutMs) {
     }
 }
 
-// Case-insensitive substring search.
-bool WcsContainsIgnoreCase(const wchar_t* hay, const wchar_t* needle) {
-    if (!hay || !needle)
-        return false;
-    const std::size_t nl = wcslen(needle);
-    if (nl == 0)
-        return true;
-    for (const wchar_t* p = hay; *p; ++p) {
-        if (_wcsnicmp(p, needle, nl) == 0)
-            return true;
-    }
-    return false;
-}
-
-// True when hwnd looks like the REAL CS2 game window (not the small
-// "international / China region" selection dialog that appears at startup):
-// visible, SDL window class, CS2-like title and a full-size window.
-bool IsGameWindow(HWND hwnd) {
-    if (!IsWindowVisible(hwnd) || IsIconic(hwnd))
-        return false;
-
-    wchar_t cls[128] = {};
-    GetClassNameW(hwnd, cls, 128);
-    if (_wcsicmp(cls, L"SDL_app") != 0)
-        return false;
-
-    wchar_t title[256] = {};
-    GetWindowTextW(hwnd, title, 256);
-    if (!WcsContainsIgnoreCase(title, L"Counter-Strike 2") &&
-        !WcsContainsIgnoreCase(title, L"CS2"))
-        return false;
-
-    RECT rc = {};
-    if (!GetWindowRect(hwnd, &rc))
-        return false;
-    return (rc.right - rc.left) >= 800 && (rc.bottom - rc.top) >= 600;
-}
-
-// True when the foreground window is the real game window of the target pid,
-// i.e. the user is actually inside the game (region dialog excluded).
+// True when the foreground window belongs to the target pid and is visible,
+// i.e. the user has the game focused. Window title/size are NOT used for
+// identification (they are unreliable across locales and the region-select
+// dialog); the game-engine check below is the phase discriminator.
 bool IsForeground(DWORD pid) {
     const HWND fg = GetForegroundWindow();
     if (!fg)
         return false;
     DWORD fgPid = 0;
     GetWindowThreadProcessId(fg, &fgPid);
-    return fgPid == pid && IsGameWindow(fg);
+    return fgPid == pid && IsWindowVisible(fg);
 }
 
 // True when the target process has loaded the real game engine (client.dll /
-// engine2.dll) - i.e. it is past the launcher/region-selection phase.
+// engine2.dll / schemasystem.dll) - i.e. it is past the launcher/region
+// selection phase. None of these are present while the "international / China
+// region" dialog is shown.
 bool GameEngineLoaded(DWORD pid) {
     const HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
     if (snap == INVALID_HANDLE_VALUE)
@@ -209,7 +175,8 @@ bool GameEngineLoaded(DWORD pid) {
     if (Module32FirstW(snap, &me)) {
         do {
             if (_wcsicmp(me.szModule, L"engine2.dll") == 0 ||
-                _wcsicmp(me.szModule, L"client.dll") == 0) {
+                _wcsicmp(me.szModule, L"client.dll") == 0 ||
+                _wcsicmp(me.szModule, L"schemasystem.dll") == 0) {
                 found = true;
                 break;
             }
@@ -219,8 +186,8 @@ bool GameEngineLoaded(DWORD pid) {
     return found;
 }
 
-// Waits until the real game window is focused by the user AND the game engine
-// is loaded (or the timeout expires).
+// Waits until the user has the game window focused AND the game engine is
+// loaded (or the timeout expires).
 bool WaitForFocus(DWORD pid, DWORD timeoutMs) {
     std::wprintf(L"[*] waiting for the game to load and for its window to receive focus...\n");
     const DWORD t0 = GetTickCount();
@@ -231,7 +198,7 @@ bool WaitForFocus(DWORD pid, DWORD timeoutMs) {
         const bool engine = GameEngineLoaded(pid);
         if (!engineSeen && engine) {
             engineSeen = true;
-            std::wprintf(L"[+] game engine loaded (client.dll present).\n");
+            std::wprintf(L"[+] game engine loaded (client.dll/engine2.dll present).\n");
         }
         if (focused && engine) {
             std::wprintf(L"[+] game window is in focus.\n");

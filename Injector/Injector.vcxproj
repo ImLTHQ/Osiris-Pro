@@ -96,6 +96,9 @@
   <ItemGroup>
     <MASM Include="Shellcode.asm" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Injector.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />

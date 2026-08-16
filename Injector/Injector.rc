@@ -1,0 +1,2 @@
+// Injector resource script - embeds the syringe icon into the executable.
+IDI_ICON1               ICON                    "Injector.ico"

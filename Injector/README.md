@@ -124,5 +124,7 @@ Osiris.dll 的配置保存在系统 AppData（Roaming）目录：
 | `Injector.cpp` | 零参数入口、自动提权、自动注入、诊断输出 |
 | `ManualMapper.cpp/.h` | PE 解析、重定位、导入解析、载荷组装 |
 | `Shellcode.asm` | 目标进程内执行的 PIC 载荷（MASM x64） |
+| `Injector.ico` / `Injector.rc` | exe 图标（深色方底 + 白色注射器轮廓） |
+| `make_icon.ps1` | 图标生成脚本（改图标后重跑再编译） |
 | `EmbeddedDll.h` | 生成文件：内置 DLL 字节数组（勿手改） |
 | `build_injector.ps1` | 静默构建脚本 |

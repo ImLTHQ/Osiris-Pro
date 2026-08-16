@@ -161,10 +161,10 @@ bool IsForeground(DWORD pid) {
     return fgPid == pid && IsWindowVisible(fg);
 }
 
-// True when the target process has loaded the real game engine (client.dll /
-// engine2.dll / schemasystem.dll) - i.e. it is past the launcher/region
-// selection phase. None of these are present while the "international / China
-// region" dialog is shown.
+// True when the target process has loaded the real game code (client.dll).
+// This is the phase discriminator: at the "international / China region"
+// selection dialog engine2.dll is already loaded, but client.dll is NOT -
+// it only appears once the real game starts after the region choice.
 bool GameEngineLoaded(DWORD pid) {
     const HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32, pid);
     if (snap == INVALID_HANDLE_VALUE)
@@ -174,9 +174,7 @@ bool GameEngineLoaded(DWORD pid) {
     bool found = false;
     if (Module32FirstW(snap, &me)) {
         do {
-            if (_wcsicmp(me.szModule, L"engine2.dll") == 0 ||
-                _wcsicmp(me.szModule, L"client.dll") == 0 ||
-                _wcsicmp(me.szModule, L"schemasystem.dll") == 0) {
+            if (_wcsicmp(me.szModule, L"client.dll") == 0) {
                 found = true;
                 break;
             }
@@ -198,7 +196,7 @@ bool WaitForFocus(DWORD pid, DWORD timeoutMs) {
         const bool engine = GameEngineLoaded(pid);
         if (!engineSeen && engine) {
             engineSeen = true;
-            std::wprintf(L"[+] game engine loaded (client.dll/engine2.dll present).\n");
+            std::wprintf(L"[+] game client loaded (client.dll present).\n");
         }
         if (focused && engine) {
             std::wprintf(L"[+] game window is in focus.\n");

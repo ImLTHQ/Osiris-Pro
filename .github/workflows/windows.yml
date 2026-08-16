@@ -52,7 +52,7 @@ jobs:
       shell: cmd
       run: msbuild Injector\Injector.vcxproj /p:Platform=x64 /p:Configuration=${{ matrix.configuration }} ${{ env.toolset }}
     - name: Upload artifacts (DLL + injector)
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Osiris-${{ matrix.configuration }}-${{ matrix.toolset }}-${{ matrix.os }}
         path: |

@@ -42,21 +42,15 @@ jobs:
     - name: Set toolset
       if: matrix.toolset == 'ClangCL'
       run: echo "toolset=/p:PlatformToolset=${{ matrix.toolset }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-    - name: Build Osiris.dll
+    - name: Build Osiris.dll + Injector.exe (single MSBuild pass)
       shell: cmd
       run: msbuild Osiris.sln /p:Platform=x64 /p:Configuration=${{ matrix.configuration }} ${{ env.toolset }}
-    - name: Generate embedded DLL header
-      shell: pwsh
-      run: powershell -NoProfile -ExecutionPolicy Bypass -File Injector\generate_embedded.ps1 -Configuration ${{ matrix.configuration }}
-    - name: Build Injector.exe (embedded DLL)
-      shell: cmd
-      run: msbuild Injector\Injector.vcxproj /p:Platform=x64 /p:Configuration=${{ matrix.configuration }} ${{ env.toolset }}
     - name: Stage artifacts (flat, no folders in the zip)
       shell: pwsh
       run: |
         New-Item -ItemType Directory -Force -Path staging | Out-Null
         Copy-Item "x64\${{ matrix.configuration }}\Osiris.dll" -Destination staging
-        Copy-Item "Injector\x64\${{ matrix.configuration }}\Injector.exe" -Destination staging
+        Copy-Item "x64\${{ matrix.configuration }}\Injector.exe" -Destination staging
     - name: Upload artifacts (DLL + injector)
       uses: actions/upload-artifact@v5
       with:
@@ -80,6 +74,8 @@ jobs:
       run: cmake -Werror=dev -D ENABLE_TESTS="unit;functional" -D CMAKE_COMPILE_WARNING_AS_ERROR=1 -A x64 ${{ env.toolset }} -B build
     - name: build source
       run: cmake --build build --target Osiris --config ${{ matrix.configuration }}
+    - name: build injector (embedded DLL resource)
+      run: cmake --build build --target Injector --config ${{ matrix.configuration }}
     - name: build unit tests
       run: cmake --build build --target UnitTests --config ${{ matrix.configuration }}
     - name: build functional tests
@@ -88,3 +84,28 @@ jobs:
       run: ctest -R ^Unit --test-dir build -C ${{ matrix.configuration }} --output-on-failure --no-tests=error --schedule-random -j $env:NUMBER_OF_PROCESSORS
     - name: run functional tests
       run: ctest -R ^Functional --test-dir build -C ${{ matrix.configuration }} --output-on-failure --no-tests=error --schedule-random -j $env:NUMBER_OF_PROCESSORS
+
+  # MinGW-w64 (MSYS2: modern GCC + NASM + windres) via CMake: validates the
+  # toolchain-portable build path (RCDATA resource + NASM shellcode).
+  mingw:
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - uses: actions/checkout@v6
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: >-
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-nasm
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-ninja
+    - name: Configure (Ninja + GCC)
+      run: cmake -S . -B build -G Ninja -D CMAKE_BUILD_TYPE=Release -D CMAKE_C_COMPILER=gcc -D CMAKE_CXX_COMPILER=g++ -D CMAKE_RC_COMPILER=windres -D CMAKE_ASM_NASM_COMPILER=nasm
+    - name: Build Osiris.dll
+      run: cmake --build build --target Osiris
+    - name: Build Injector.exe
+      run: cmake --build build --target Injector

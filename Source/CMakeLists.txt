@@ -9,7 +9,21 @@ target_include_directories(Osiris PRIVATE "${CMAKE_SOURCE_DIR}/Source")
 target_link_libraries(Osiris PRIVATE ${CMAKE_DL_LIBS})
 
 if(WIN32)
-  target_sources(Osiris PRIVATE Platform/Windows/Syscalls/WindowsSyscall.asm)
+  if(MSVC)
+    target_sources(Osiris PRIVATE Platform/Windows/Syscalls/WindowsSyscall.asm)
+  else()
+    target_sources(Osiris PRIVATE Platform/Windows/Syscalls/WindowsSyscall.nasm)
+    # MinGW-w64 provides GUID constants (FOLDERID_*, ...) in libuuid.
+    target_link_libraries(Osiris PRIVATE uuid)
+  endif()
+endif()
+
+if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # Manual-mapped payloads must be self-contained: the target process has no
+  # libstdc++/libgcc/libwinpthread DLLs. -static links the whole MinGW runtime
+  # statically (a -Bstatic/-Bdynamic pair is NOT enough: the posix-threads g++
+  # spec injects its own dynamic -lwinpthread after user flags).
+  target_link_options(Osiris PRIVATE -static)
 endif()
 
 if(MSVC)
@@ -24,7 +38,11 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   if(NOT CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
     target_compile_options(Osiris PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall>)
-    target_link_options(Osiris PRIVATE LINKER:--no-undefined -z noexecstack)
+    target_link_options(Osiris PRIVATE LINKER:--no-undefined)
+    if(UNIX)
+      # -z noexecstack is an ELF-only linker option; MinGW (PE) rejects it.
+      target_link_options(Osiris PRIVATE LINKER:-z,noexecstack)
+    endif()
   endif()
 
   target_compile_options(Osiris PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-braces>)

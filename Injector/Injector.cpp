@@ -10,10 +10,11 @@
 #include <conio.h>
 
 #include <cstdio>
+#include <cstdint>
 #include <string>
 #include <vector>
 
-#include "EmbeddedDll.h"
+#include "resource.h"
 #include "ManualMapper.h"
 
 namespace {
@@ -129,36 +130,24 @@ bool LaunchTarget() {
     return true;
 }
 
-// Polls for the target process until it appears or the timeout expires.
-DWORD WaitForProcess(DWORD timeoutMs) {
+// Refresh interval for the process/module polling loops below.
+constexpr DWORD kPollIntervalMs = 3000;
+
+// Polls for the target process until it appears (no timeout - waits forever).
+DWORD WaitForProcess() {
     const DWORD t0 = GetTickCount();
     DWORD lastStatus = 0;
     for (;;) {
         if (const DWORD pid = FindTarget())
             return pid;
         const DWORD elapsed = GetTickCount() - t0;
-        if (elapsed >= timeoutMs)
-            return 0;
-        if (elapsed - lastStatus >= 5000) {
+        if (elapsed - lastStatus >= kPollIntervalMs * 2) {
             lastStatus = elapsed;
             std::wprintf(L"[*] waiting for %ls to start... (%u s)\n", TargetExe(),
                          elapsed / 1000);
         }
-        Sleep(500);
+        Sleep(kPollIntervalMs);
     }
-}
-
-// True when the foreground window belongs to the target pid and is visible,
-// i.e. the user has the game focused. Window title/size are NOT used for
-// identification (they are unreliable across locales and the region-select
-// dialog); the game-engine check below is the phase discriminator.
-bool IsForeground(DWORD pid) {
-    const HWND fg = GetForegroundWindow();
-    if (!fg)
-        return false;
-    DWORD fgPid = 0;
-    GetWindowThreadProcessId(fg, &fgPid);
-    return fgPid == pid && IsWindowVisible(fg);
 }
 
 // True when the target process has loaded the real game code (client.dll).
@@ -184,52 +173,21 @@ bool GameEngineLoaded(DWORD pid) {
     return found;
 }
 
-// Waits until the game client (client.dll) is loaded in the target.
-bool WaitForClientLoaded(DWORD pid, DWORD timeoutMs) {
+// Waits until the game client (client.dll) is loaded in the target (no
+// timeout - waits forever, polling every kPollIntervalMs).
+void WaitForClientLoaded(DWORD pid) {
     const DWORD t0 = GetTickCount();
     DWORD lastStatus = 0;
     for (;;) {
         if (GameEngineLoaded(pid))
-            return true;
+            return;
         const DWORD elapsed = GetTickCount() - t0;
-        if (elapsed >= timeoutMs)
-            return false;
-        if (elapsed - lastStatus >= 5000) {
+        if (elapsed - lastStatus >= kPollIntervalMs * 2) {
             lastStatus = elapsed;
             std::wprintf(L"[*] waiting for the game client (client.dll)... (%u s)\n",
                          elapsed / 1000);
         }
-        Sleep(500);
-    }
-}
-
-// Waits until the user has the game window focused AND the game engine is
-// loaded (or the timeout expires).
-bool WaitForFocus(DWORD pid, DWORD timeoutMs) {
-    std::wprintf(L"[*] waiting for the game to load and for its window to receive focus...\n");
-    const DWORD t0 = GetTickCount();
-    DWORD lastStatus = 0;
-    bool engineSeen = false;
-    for (;;) {
-        const bool focused = IsForeground(pid);
-        const bool engine = GameEngineLoaded(pid);
-        if (!engineSeen && engine) {
-            engineSeen = true;
-            std::wprintf(L"[+] game client loaded (client.dll present).\n");
-        }
-        if (focused && engine) {
-            std::wprintf(L"[+] game window is in focus.\n");
-            return true;
-        }
-        const DWORD elapsed = GetTickCount() - t0;
-        if (elapsed >= timeoutMs)
-            return false;
-        if (elapsed - lastStatus >= 5000) {
-            lastStatus = elapsed;
-            std::wprintf(L"[*] waiting for focus... (%u s; focused=%d engine=%d)\n",
-                         elapsed / 1000, focused ? 1 : 0, engine ? 1 : 0);
-        }
-        Sleep(500);
+        Sleep(kPollIntervalMs);
     }
 }
 
@@ -252,9 +210,6 @@ int wmain() {
     }
 
     // ---- find the target; if missing, launch it via Steam and wait ----
-    constexpr DWORD kProcessWaitMs = 5 * 60 * 1000;   // 5 minutes to start
-    constexpr DWORD kFocusWaitMs = 15 * 60 * 1000;    // 15 minutes for user focus
-
     DWORD pid = FindTarget();
     if (pid == 0) {
         if (!LaunchTarget()) {
@@ -262,33 +217,18 @@ int wmain() {
             PauseOnExit();
             return 4;
         }
-        pid = WaitForProcess(kProcessWaitMs);
-        if (pid == 0) {
-            std::wprintf(L"[!] %ls did not start within 5 minutes; aborting.\n", TargetExe());
-            PauseOnExit();
-            return 4;
-        }
+        pid = WaitForProcess();  // waits forever, 3 s refresh
         std::wprintf(L"[+] %ls started (pid %lu).\n", TargetExe(), pid);
-
-        // Only inject once the user has the game window focused.
-        if (!WaitForFocus(pid, kFocusWaitMs)) {
-            std::wprintf(L"[!] game window never received focus within 15 minutes; aborting.\n");
-            PauseOnExit();
-            return 4;
-        }
-        std::wprintf(L"[*] injecting now...\n");
     } else {
         std::wprintf(L"[*] target: %ls already running (pid %lu).\n", TargetExe(), pid);
-        // Also gate the already-running path: if the game is still at the
-        // region-select dialog, client.dll is not loaded yet - wait for it
-        // instead of injecting too early.
-        if (!WaitForClientLoaded(pid, kProcessWaitMs)) {
-            std::wprintf(L"[!] game client (client.dll) did not load within 5 minutes; aborting.\n");
-            PauseOnExit();
-            return 4;
-        }
-        std::wprintf(L"[*] game client loaded; injecting immediately.\n");
     }
+
+    // Both paths: wait until the game client (client.dll) is loaded, then
+    // inject immediately - no window-focus gating. At the region-select
+    // dialog engine2.dll is loaded but client.dll is not, so injection
+    // naturally happens once the real game starts.
+    WaitForClientLoaded(pid);
+    std::wprintf(L"[*] game client loaded; injecting immediately.\n");
 
     // ---- dev hook: dry run ----
     if (EnvFlag(L"INJECTOR_DRY_RUN")) {
@@ -308,18 +248,32 @@ int wmain() {
     }
 
     // ---- embedded module ----
-    if constexpr (kEmbeddedDllSize == 0) {
-        std::wprintf(L"[!] no embedded DLL (rebuild via build_injector.ps1).\n");
+    // Osiris.dll is embedded verbatim as an RCDATA resource in the .rsrc
+    // section (see resource.h and the generated EmbeddedDll.rc). The bytes
+    // stay in a read-only section and are only read by the manual mapper.
+    const HRSRC dllRes = FindResourceW(nullptr, MAKEINTRESOURCEW(IDR_EMBEDDED_DLL),
+                                       RT_RCDATA);
+    if (dllRes == nullptr) {
+        std::wprintf(L"[!] embedded DLL resource missing (broken build?).\n");
         CloseHandle(hProc);
         PauseOnExit();
         return 4;
     }
-    std::wprintf(L"[*] module: embedded Osiris.dll (%u bytes)\n", kEmbeddedDllSize);
+    const auto* dllBytes = static_cast<const std::uint8_t*>(
+        LockResource(LoadResource(nullptr, dllRes)));
+    const DWORD dllSize = SizeofResource(nullptr, dllRes);
+    if (dllBytes == nullptr || dllSize == 0) {
+        std::wprintf(L"[!] embedded DLL resource is empty (broken build?).\n");
+        CloseHandle(hProc);
+        PauseOnExit();
+        return 4;
+    }
+    std::wprintf(L"[*] module: embedded Osiris.dll (%lu bytes)\n", dllSize);
 
     // ---- map ----
     std::wstring error;
     const DWORD t0 = GetTickCount();
-    const bool ok = mm::ManualMap(hProc, kEmbeddedDll, kEmbeddedDllSize, error);
+    const bool ok = mm::ManualMap(hProc, dllBytes, dllSize, error);
     CloseHandle(hProc);
 
     if (ok) {

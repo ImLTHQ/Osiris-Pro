@@ -5,6 +5,12 @@
 #include <cstring>
 #include <memory>
 
+// Global scope on purpose: declared with C linkage so the names stay unmangled
+// on every toolchain. (A namespace-scope extern "C" variable would be mangled
+// by GCC/MinGW, while ml64 and nasm both export plain codeStart/codeEnd.)
+extern "C" unsigned char codeStart[];
+extern "C" unsigned char codeEnd[];
+
 namespace mm {
 namespace {
 
@@ -40,9 +46,6 @@ struct alignas(8) Thunk {
     std::uint64_t pIatSlot;      // 0x10
 };
 static_assert(sizeof(Thunk) == 0x18);
-
-extern "C" unsigned char codeStart[];
-extern "C" unsigned char codeEnd[];
 
 std::size_t ShellcodeSize() {
     return static_cast<std::size_t>(

@@ -24,11 +24,16 @@ inline std::byte* memcpy(std::byte* dest, const std::byte* src, std::size_t coun
 
 inline unsigned char* memset(unsigned char* const dest, unsigned char ch, std::size_t count) noexcept
 {
-    // Intrinsic on purpose: clang's loop-idiom pass has rewritten a plain
-    // store loop here into a self tail-call (broken memset on some LLVM
-    // versions), so emit rep stosb directly, exactly like memcpy uses
-    // __movsb above.
-    __stosb(dest, ch, count);
+    // Volatile stores on purpose: clang's loop-idiom pass rewrites a plain
+    // memset-style loop into a call to memset itself (tail-recursion, the
+    // count never advances - the game hangs in an empty loop). Neither
+    // extern "C" linkage nor the __stosb intrinsic reliably defeats this
+    // across LLVM versions (verified against the CI clang-cl toolchain),
+    // but the idiom recognizer always skips volatile accesses, so the
+    // stores are guaranteed to survive.
+    volatile auto* volatileDest = static_cast<volatile unsigned char*>(dest);
+    for (std::size_t i = 0; i < count; ++i)
+        volatileDest[i] = ch;
     return dest;
 }
 

@@ -44,7 +44,7 @@ Cross-platform (Windows, Linux) game hack for **Counter-Strike 2** with GUI and 
 ### Prerequisites
 
 **Windows**: Visual Studio 2022 with the **Desktop development with C++** workload
-**Linux**: CMake 3.28 or newer, g++ 14 or newer or clang++ 18 or newer
+**Linux**: CMake 3.24 or newer, g++ 14 or newer or clang++ 18 or newer
 
 ### Windows (single command)
 

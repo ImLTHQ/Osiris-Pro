@@ -75,43 +75,43 @@ inline const unsigned char* memchr(const unsigned char* ptr, unsigned char ch, s
 }
 
 #pragma function(memcpy)
-void* memcpy(void* dest, const void* src, size_t count)
+extern "C" void* memcpy(void* dest, const void* src, size_t count)
 {
     return crt::memcpy(static_cast<std::byte*>(dest), static_cast<const std::byte*>(src), count);
 }
 
 #pragma function(memmove)
-void* memmove(void* dest, const void* src, size_t count)
+extern "C" void* memmove(void* dest, const void* src, size_t count)
 {
     return crt::memmove(static_cast<unsigned char*>(dest), static_cast<const unsigned char*>(src), count);
 }
 
 #pragma function(memcmp)
-int memcmp(const void* s1, const void* s2, std::size_t n)
+extern "C" int memcmp(const void* s1, const void* s2, std::size_t n)
 {
     return crt::memcmp(static_cast<const unsigned char*>(s1), static_cast<const unsigned char*>(s2), n);
 }
 
 #pragma function(memset)
-void* memset(void* dest, int ch, size_t count)
+extern "C" void* memset(void* dest, int ch, size_t count)
 {
     return crt::memset(static_cast<unsigned char*>(dest), static_cast<unsigned char>(ch), count);
 }
 
 #pragma function(strcmp)
-int strcmp(const char* s1, const char* s2)
+extern "C" int strcmp(const char* s1, const char* s2)
 {
     return crt::strcmp(reinterpret_cast<const unsigned char*>(s1), reinterpret_cast<const unsigned char*>(s2));
 }
 
 #pragma function(strlen)
-std::size_t strlen(const char* str)
+extern "C" std::size_t strlen(const char* str)
 {
     return crt::strlen(str);
 }
 
 #pragma function(memchr)
-const void* memchr(const void* ptr, int ch, std::size_t count)
+extern "C" const void* memchr(const void* ptr, int ch, std::size_t count)
 {
     return crt::memchr(reinterpret_cast<const unsigned char*>(ptr), static_cast<unsigned char>(ch), count);
 }
@@ -119,7 +119,7 @@ const void* memchr(const void* ptr, int ch, std::size_t count)
 #ifndef _DLL
 
 #pragma function(wcslen)
-std::size_t wcslen(const wchar_t* str)
+extern "C" std::size_t wcslen(const wchar_t* str)
 {
     std::size_t length = 0;
     while (*str) {

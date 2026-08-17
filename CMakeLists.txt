@@ -26,15 +26,18 @@ if(WIN32)
 endif()
 
 # Unified output directory: Osiris.dll and Injector.exe share one folder,
-# mirroring the MSBuild layout (repo-root x64\<Configuration>).
-if(CMAKE_CONFIGURATION_TYPES)
-  foreach(config IN LISTS CMAKE_CONFIGURATION_TYPES)
+# mirroring the MSBuild layout (repo-root x64\<Configuration>). Windows only -
+# the Injector target does not exist on Linux.
+if(WIN32)
+  if(CMAKE_CONFIGURATION_TYPES)
+    foreach(config IN LISTS CMAKE_CONFIGURATION_TYPES)
+      set_target_properties(Osiris Injector PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY_${config} "${CMAKE_BINARY_DIR}/x64/${config}")
+    endforeach()
+  else()
     set_target_properties(Osiris Injector PROPERTIES
-      RUNTIME_OUTPUT_DIRECTORY_${config} "${CMAKE_BINARY_DIR}/x64/${config}")
-  endforeach()
-else()
-  set_target_properties(Osiris Injector PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/x64")
+      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/x64")
+  endif()
 endif()
 
 if(ENABLE_TESTS)

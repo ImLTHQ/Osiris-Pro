@@ -48,8 +48,26 @@ Cross-platform (Windows, Linux) game hack for **Counter-Strike 2** with GUI and 
 
 ### Windows (single command)
 
+```powershell
+& ((& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe")[0]) Osiris.sln /p:Platform=x64 /p:Configuration=Release
+```
+
+This locates MSBuild automatically (it is not on PATH in a regular PowerShell
+window) and builds the whole solution with the projects' default toolset
+(v143). Inside a **Developer PowerShell / Developer Command Prompt for VS** the
+plain command works too:
+
 ```bat
 msbuild Osiris.sln /p:Platform=x64 /p:Configuration=Release
+```
+
+The projects target the **v143** toolset (Visual Studio 2022). If only a newer
+toolset is installed (e.g. v144/v145 from a newer Visual Studio), either add the
+matching component in the Visual Studio Installer ("MSVC v143 - VS 2022 C++
+x64/x86 build tools") or override it per invocation:
+
+```powershell
+... Osiris.sln /p:Platform=x64 /p:Configuration=Release /p:PlatformToolset=v144
 ```
 
 One build produces both artifacts (unified output directory `x64\Release\`, no scripts involved):

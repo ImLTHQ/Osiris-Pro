@@ -24,8 +24,11 @@ inline std::byte* memcpy(std::byte* dest, const std::byte* src, std::size_t coun
 
 inline unsigned char* memset(unsigned char* const dest, unsigned char ch, std::size_t count) noexcept
 {
-    for (std::size_t i = 0; i < count; ++i)
-        dest[i] = ch;
+    // Intrinsic on purpose: clang's loop-idiom pass has rewritten a plain
+    // store loop here into a self tail-call (broken memset on some LLVM
+    // versions), so emit rep stosb directly, exactly like memcpy uses
+    // __movsb above.
+    __stosb(dest, ch, count);
     return dest;
 }
 

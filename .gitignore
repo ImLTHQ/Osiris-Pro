@@ -332,3 +332,10 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+
+# Icon gallery: generated files (regenerate with: python3 icon_gallery/generate.py)
+icon_gallery/icons/
+icon_gallery/raw/
+icon_gallery/gallery.html
+icon_gallery/__pycache__/
+icon_gallery/tmp_*/

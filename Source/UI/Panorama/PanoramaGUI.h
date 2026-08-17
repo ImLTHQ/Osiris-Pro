@@ -132,7 +132,7 @@ public:
 
   $.CreatePanel('Image', openMenuButton, '', {
     class: "mainmenu-top-navbar__radio-btn__icon",
-    src: "s2r://panorama/images/icons/ui/bug.vsvg"
+    src: "s2r://panorama/images/icons/ui/vacnet.vsvg"
   });
 
   $.DispatchEvent('Activated', $.GetContextPanel().FindChildTraverse("MainMenuNavBarHome"), 'mouse');

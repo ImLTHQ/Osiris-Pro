@@ -48,9 +48,15 @@ struct alignas(8) Thunk {
 static_assert(sizeof(Thunk) == 0x18);
 
 std::size_t ShellcodeSize() {
-    return static_cast<std::size_t>(
-        reinterpret_cast<std::uintptr_t>(codeEnd) -
-        reinterpret_cast<std::uintptr_t>(codeStart));
+    const auto start = reinterpret_cast<std::uintptr_t>(codeStart);
+    const auto end = reinterpret_cast<std::uintptr_t>(codeEnd);
+    // The linker must keep the two labels in order. If it routed the address
+    // references through incremental-link (ILT) thunks, the subtraction can
+    // come out negative and wrap to a huge size_t; report 0 in that case so
+    // the caller can fail cleanly instead of overflowing a buffer.
+    if (end <= start)
+        return 0;
+    return static_cast<std::size_t>(end - start);
 }
 
 std::wstring LastErrorText(DWORD err) {
@@ -461,8 +467,15 @@ bool ManualMap(HANDLE process, const std::uint8_t* dllBytes, std::size_t dllSize
     // ---- 8. assemble the payload blob ----
     std::size_t moduleNamesBytes = 0, funcNamesBytes = 0;
     const std::size_t codeSize = ShellcodeSize();
-    if (codeSize == 0) {
-        error = L"empty shellcode (linker folded it?)";
+    // The shellcode is a few hundred bytes. Anything outside this range means
+    // the linker mislaid the codeStart/codeEnd labels (e.g. /INCREMENTAL
+    // routing the address references through ILT thunks - see the vcxproj and
+    // CMakeLists LinkIncremental settings); copying a bogus range would crash
+    // the injector, so fail cleanly instead.
+    if (codeSize < 0x40 || codeSize > 0x10000) {
+        error = L"invalid shellcode size (" + std::to_wstring(codeSize) +
+                L" bytes): codeStart/codeEnd are mislaid. Link the Injector "
+                L"with /INCREMENTAL:NO.";
         VirtualFreeEx(process, imageBase, 0, MEM_RELEASE);
         return false;
     }

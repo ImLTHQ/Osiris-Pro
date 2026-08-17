@@ -60,6 +60,10 @@ if(MSVC)
   # UAC: requireAdministrator (mirrors the vcxproj EnableUAC settings).
   target_link_options(Injector PRIVATE
     "/MANIFESTUAC:level='requireAdministrator' uiAccess='false'")
+  # CMake defaults MSVC Debug to /INCREMENTAL, which routes the codeStart/
+  # codeEnd address references through ILT thunks and breaks ShellcodeSize()
+  # (codeEnd - codeStart comes out negative). Disable it for this target.
+  target_link_options(Injector PRIVATE "/INCREMENTAL:NO")
 else()
   # MinGW/LLVM: console apps using wmain() need the Unicode startup entry
   # point (MSVC picks it up automatically).

@@ -340,5 +340,5 @@ icon_gallery/gallery.html
 icon_gallery/__pycache__/
 icon_gallery/tmp_*/
 
-# tools
-Tools/
+# DEBUG
+DEBUG/

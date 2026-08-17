@@ -46,6 +46,15 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <!-- The mapper takes the address of the asm labels codeStart/codeEnd.
+       Incremental linking (the Debug default) routes those references through
+       ILT thunks; the thunk order then makes codeEnd - codeStart negative and
+       ShellcodeSize() wraps to a huge value, overflowing the payload memcpy
+       and crashing the injector. Must be a property: the Link task reads
+       $(LinkIncremental), not the <Link> item metadata. -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
@@ -63,6 +72,9 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <!-- Keep the IDE's "Enable Incremental Linking" UI in sync with the
+           LinkIncremental property above (see the comment there). -->
+      <LinkIncremental>false</LinkIncremental>
       <EnableUAC>true</EnableUAC>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
       <UACUIAccess>false</UACUIAccess>

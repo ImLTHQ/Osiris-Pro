@@ -40,16 +40,6 @@ protected:
         get<KillfeedPreserverEnabled>() = true;
         get<PostRoundTimerEnabled>() = true;
 
-        get<model_glow_vars::Enabled>() = true;
-        get<model_glow_vars::GlowPlayers>() = true;
-        get<model_glow_vars::GlowOnlyEnemies>() = true;
-        get<model_glow_vars::PlayerGlowColorMode>() = PlayerModelGlowColorType::PlayerOrTeamColor;
-        get<model_glow_vars::GlowWeapons>() = true;
-        get<model_glow_vars::GlowDroppedBomb>() = false;
-        get<model_glow_vars::GlowTickingBomb>() = false;
-        get<model_glow_vars::GlowDefuseKits>() = true;
-        get<model_glow_vars::GlowGrenadeProjectiles>() = true;
-
         get<outline_glow_vars::Enabled>() = true;
         get<outline_glow_vars::GlowPlayers>() = true;
         get<outline_glow_vars::GlowOnlyEnemies>() = false;
@@ -87,39 +77,21 @@ protected:
     void setVariableExpectationsV2()
     {
         setVariableExpectationsV1();
-        get<model_glow_vars::PlayerBlueHue>() = model_glow_vars::PlayerBlueHue::ValueType{color::HueInteger{203}};
-        get<model_glow_vars::PlayerGreenHue>() = model_glow_vars::PlayerGreenHue::ValueType{color::HueInteger{133}};
-        get<model_glow_vars::PlayerYellowHue>() = model_glow_vars::PlayerYellowHue::ValueType{color::HueInteger{48}};
-        get<model_glow_vars::PlayerOrangeHue>() = model_glow_vars::PlayerOrangeHue::ValueType{color::HueInteger{13}};
-        get<model_glow_vars::PlayerPurpleHue>() = model_glow_vars::PlayerPurpleHue::ValueType{color::HueInteger{269}};
     }
 
     void setVariableExpectationsV3()
     {
         setVariableExpectationsV2();
-        get<model_glow_vars::TeamTHue>() = model_glow_vars::TeamTHue::ValueType{color::HueInteger{30}};
-        get<model_glow_vars::TeamCTHue>() = model_glow_vars::TeamCTHue::ValueType{color::HueInteger{220}};
-        get<model_glow_vars::LowHealthHue>() = model_glow_vars::LowHealthHue::ValueType{color::HueInteger{311}};
-        get<model_glow_vars::HighHealthHue>() = model_glow_vars::HighHealthHue::ValueType{color::HueInteger{256}};
-        get<model_glow_vars::EnemyHue>() = model_glow_vars::EnemyHue::ValueType{color::HueInteger{353}};
-        get<model_glow_vars::AllyHue>() = model_glow_vars::EnemyHue::ValueType{color::HueInteger{74}};
     }
 
     void setVariableExpectationsV4()
     {
         setVariableExpectationsV3();
-        get<model_glow_vars::MolotovHue>() = model_glow_vars::MolotovHue::ValueType{color::HueInteger{37}};
-        get<model_glow_vars::FlashbangHue>() = model_glow_vars::FlashbangHue::ValueType{color::HueInteger{205}};
-        get<model_glow_vars::HEGrenadeHue>() = model_glow_vars::HEGrenadeHue::ValueType{color::HueInteger{333}};
-        get<model_glow_vars::SmokeGrenadeHue>() = model_glow_vars::SmokeGrenadeHue::ValueType{color::HueInteger{116}};
     }
 
     void setVariableExpectationsV5()
     {
         setVariableExpectationsV4();
-        get<model_glow_vars::DroppedBombHue>() = model_glow_vars::DroppedBombHue::ValueType{color::HueInteger{69}};
-        get<model_glow_vars::TickingBombHue>() = model_glow_vars::TickingBombHue::ValueType{color::HueInteger{303}};
-        get<model_glow_vars::DefuseKitHue>() = model_glow_vars::DefuseKitHue::ValueType{color::HueInteger{227}};
     }
 
     void setVariableExpectationsV6()

@@ -66,40 +66,6 @@ private:
     {
         configConversion.beginObject(u8"Visuals");
 
-        configConversion.beginObject(u8"ModelGlow");
-        configConversion.boolean(u8"Enabled", loadVariable<model_glow_vars::Enabled>(), saveVariable<model_glow_vars::Enabled>());
-        configConversion.beginObject(u8"Players");
-        configConversion.boolean(u8"Enabled", loadVariable<model_glow_vars::GlowPlayers>(), saveVariable<model_glow_vars::GlowPlayers>());
-        configConversion.boolean(u8"OnlyEnemies", loadVariable<model_glow_vars::GlowOnlyEnemies>(), saveVariable<model_glow_vars::GlowOnlyEnemies>());
-        configConversion.uint(u8"ColorMode", loadVariable<model_glow_vars::PlayerGlowColorMode>(), saveVariable<model_glow_vars::PlayerGlowColorMode>());
-        configConversion.endObject();
-        configConversion.boolean(u8"Weapons", loadVariable<model_glow_vars::GlowWeapons>(), saveVariable<model_glow_vars::GlowWeapons>());
-        configConversion.boolean(u8"DroppedBomb", loadVariable<model_glow_vars::GlowDroppedBomb>(), saveVariable<model_glow_vars::GlowDroppedBomb>());
-        configConversion.boolean(u8"TickingBomb", loadVariable<model_glow_vars::GlowTickingBomb>(), saveVariable<model_glow_vars::GlowTickingBomb>());
-        configConversion.boolean(u8"DefuseKits", loadVariable<model_glow_vars::GlowDefuseKits>(), saveVariable<model_glow_vars::GlowDefuseKits>());
-        configConversion.boolean(u8"GrenadeProjectiles", loadVariable<model_glow_vars::GlowGrenadeProjectiles>(), saveVariable<model_glow_vars::GlowGrenadeProjectiles>());
-        configConversion.beginObject(u8"Hues");
-        configConversion.uint(u8"PlayerBlue", loadVariable<model_glow_vars::PlayerBlueHue>(), saveVariable<model_glow_vars::PlayerBlueHue>());
-        configConversion.uint(u8"PlayerGreen", loadVariable<model_glow_vars::PlayerGreenHue>(), saveVariable<model_glow_vars::PlayerGreenHue>());
-        configConversion.uint(u8"PlayerYellow", loadVariable<model_glow_vars::PlayerYellowHue>(), saveVariable<model_glow_vars::PlayerYellowHue>());
-        configConversion.uint(u8"PlayerOrange", loadVariable<model_glow_vars::PlayerOrangeHue>(), saveVariable<model_glow_vars::PlayerOrangeHue>());
-        configConversion.uint(u8"PlayerPurple", loadVariable<model_glow_vars::PlayerPurpleHue>(), saveVariable<model_glow_vars::PlayerPurpleHue>());
-        configConversion.uint(u8"TeamT", loadVariable<model_glow_vars::TeamTHue>(), saveVariable<model_glow_vars::TeamTHue>());
-        configConversion.uint(u8"TeamCT", loadVariable<model_glow_vars::TeamCTHue>(), saveVariable<model_glow_vars::TeamCTHue>());
-        configConversion.uint(u8"LowHealth", loadVariable<model_glow_vars::LowHealthHue>(), saveVariable<model_glow_vars::LowHealthHue>());
-        configConversion.uint(u8"HighHealth", loadVariable<model_glow_vars::HighHealthHue>(), saveVariable<model_glow_vars::HighHealthHue>());
-        configConversion.uint(u8"Enemy", loadVariable<model_glow_vars::EnemyHue>(), saveVariable<model_glow_vars::EnemyHue>());
-        configConversion.uint(u8"Ally", loadVariable<model_glow_vars::AllyHue>(), saveVariable<model_glow_vars::AllyHue>());
-        configConversion.uint(u8"Molotov", loadVariable<model_glow_vars::MolotovHue>(), saveVariable<model_glow_vars::MolotovHue>());
-        configConversion.uint(u8"Flashbang", loadVariable<model_glow_vars::FlashbangHue>(), saveVariable<model_glow_vars::FlashbangHue>());
-        configConversion.uint(u8"HEGrenade", loadVariable<model_glow_vars::HEGrenadeHue>(), saveVariable<model_glow_vars::HEGrenadeHue>());
-        configConversion.uint(u8"SmokeGrenade", loadVariable<model_glow_vars::SmokeGrenadeHue>(), saveVariable<model_glow_vars::SmokeGrenadeHue>());
-        configConversion.uint(u8"DroppedBomb", loadVariable<model_glow_vars::DroppedBombHue>(), saveVariable<model_glow_vars::DroppedBombHue>());
-        configConversion.uint(u8"TickingBomb", loadVariable<model_glow_vars::TickingBombHue>(), saveVariable<model_glow_vars::TickingBombHue>());
-        configConversion.uint(u8"DefuseKit", loadVariable<model_glow_vars::DefuseKitHue>(), saveVariable<model_glow_vars::DefuseKitHue>());
-        configConversion.endObject();
-        configConversion.endObject();
-
         configConversion.beginObject(u8"OutlineGlow");
         configConversion.boolean(u8"Enabled", loadVariable<outline_glow_vars::Enabled>(), saveVariable<outline_glow_vars::Enabled>());
         configConversion.beginObject(u8"Players");

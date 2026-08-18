@@ -7,7 +7,6 @@
 #include <Features/Hud/KillfeedPreserver/KillfeedPreserverConfigVariables.h>
 #include <Features/Hud/PostRoundTimer/PostRoundTimerConfigVariables.h>
 #include <Features/Sound/SoundVisualizationConfigVariables.h>
-#include <Features/Visuals/ModelGlow/ModelGlowConfigVariables.h>
 #include <Features/Visuals/OutlineGlow/OutlineGlowConfigVariables.h>
 #include <Features/Visuals/PlayerInfoInWorld/PlayerInfoInWorldConfigVariables.h>
 #include <Features/Visuals/ViewmodelMod/ViewmodelModConfigVariables.h>
@@ -24,33 +23,6 @@ using ConfigVariableTypes = TypeList<
     FootstepSoundVisualizationEnabled,
     WeaponReloadSoundVisualizationEnabled,
     WeaponScopeSoundVisualizationEnabled,
-    model_glow_vars::Enabled,
-    model_glow_vars::GlowPlayers,
-    model_glow_vars::PlayerGlowColorMode,
-    model_glow_vars::GlowOnlyEnemies,
-    model_glow_vars::GlowWeapons,
-    model_glow_vars::GlowDroppedBomb,
-    model_glow_vars::GlowTickingBomb,
-    model_glow_vars::GlowDefuseKits,
-    model_glow_vars::GlowGrenadeProjectiles,
-    model_glow_vars::PlayerBlueHue,
-    model_glow_vars::PlayerGreenHue,
-    model_glow_vars::PlayerYellowHue,
-    model_glow_vars::PlayerOrangeHue,
-    model_glow_vars::PlayerPurpleHue,
-    model_glow_vars::TeamTHue,
-    model_glow_vars::TeamCTHue,
-    model_glow_vars::LowHealthHue,
-    model_glow_vars::HighHealthHue,
-    model_glow_vars::AllyHue,
-    model_glow_vars::EnemyHue,
-    model_glow_vars::MolotovHue,
-    model_glow_vars::FlashbangHue,
-    model_glow_vars::HEGrenadeHue,
-    model_glow_vars::SmokeGrenadeHue,
-    model_glow_vars::DroppedBombHue,
-    model_glow_vars::TickingBombHue,
-    model_glow_vars::DefuseKitHue,
     outline_glow_vars::Enabled,
     outline_glow_vars::GlowDefuseKits,
     outline_glow_vars::GlowDroppedBomb,

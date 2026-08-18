@@ -160,32 +160,8 @@
     <Filter Include="Features\Visuals\PlayerInfoInWorld\PlayerWeaponIcon\BombIcon">
       <UniqueIdentifier>{de68756a-3078-4f12-a335-d650318aa7da}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Features\Visuals\ModelGlow">
-      <UniqueIdentifier>{47384024-831e-4229-8068-9acea325ff0f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Features\Visuals\ModelGlow\PlayerModelGlow">
-      <UniqueIdentifier>{a681c408-258d-4c5d-be1d-6b1d0202f9cf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Features\Visuals\ModelGlow\WeaponModelGlow">
-      <UniqueIdentifier>{2b885594-9008-4ffe-940f-f39deae620bc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Features\Visuals\ModelGlow\DroppedBombModelGlow">
-      <UniqueIdentifier>{ab1b2ea3-e7a3-485d-820c-1a4985799676}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Features\Common">
       <UniqueIdentifier>{514d588e-9075-46df-a4c7-7eab59b608ea}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Features\Visuals\ModelGlow\TickingBombModelGlow">
-      <UniqueIdentifier>{ea04385e-4e37-4d1d-b6ac-d6ca160ee866}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Features\Visuals\ModelGlow\DefuseKitModelGlow">
-      <UniqueIdentifier>{798917e9-2237-40b5-aed0-5bb6cbe417c5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Features\Visuals\ModelGlow\GrenadeProjectileModelGlow">
-      <UniqueIdentifier>{82eb31ee-3f3f-44ea-8c75-0f9a591f78a6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Features\Visuals\ModelGlow\Preview">
-      <UniqueIdentifier>{34c6b5fe-cc1f-4d35-97f4-fa7228496d57}</UniqueIdentifier>
     </Filter>
     <Filter Include="GameClient">
       <UniqueIdentifier>{6c819c21-9a6b-4492-bca3-e8e3128123ac}</UniqueIdentifier>
@@ -1270,23 +1246,8 @@
     <ClInclude Include="CS2\Constants\SceneObjectAttributeNames.h">
       <Filter>CS2\Constants</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\ModelGlow.h">
-      <Filter>Features\Visuals\ModelGlow</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\ModelGlowState.h">
-      <Filter>Features\Visuals\ModelGlow</Filter>
-    </ClInclude>
     <ClInclude Include="MemoryPatterns\Windows\SceneObjectPatternsWindows.h">
       <Filter>MemoryPatterns\Windows</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\PlayerModelGlow\PlayerModelGlow.h">
-      <Filter>Features\Visuals\ModelGlow\PlayerModelGlow</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\WeaponModelGlow\WeaponModelGlow.h">
-      <Filter>Features\Visuals\ModelGlow\WeaponModelGlow</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\DroppedBombModelGlow\DroppedBombModelGlow.h">
-      <Filter>Features\Visuals\ModelGlow\DroppedBombModelGlow</Filter>
     </ClInclude>
     <ClInclude Include="Features\Common\InWorldPanelIndex.h">
       <Filter>Features\Common</Filter>
@@ -1306,12 +1267,6 @@
     <ClInclude Include="Features\Sound\SoundVisualizationPanelTypes.h">
       <Filter>Features\Sound</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\TickingBombModelGlow\TickingBombModelGlow.h">
-      <Filter>Features\Visuals\ModelGlow\TickingBombModelGlow</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\DefuseKitModelGlow\DefuseKitModelGlow.h">
-      <Filter>Features\Visuals\ModelGlow\DefuseKitModelGlow</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerInfoPanelCache.h">
       <Filter>Features\Visuals\PlayerInfoInWorld</Filter>
     </ClInclude>
@@ -1323,12 +1278,6 @@
     </ClInclude>
     <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerInfoPanelCacheState.h">
       <Filter>Features\Visuals\PlayerInfoInWorld</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\GrenadeProjectileModelGlow\GrenadeProjectileModelGlow.h">
-      <Filter>Features\Visuals\ModelGlow\GrenadeProjectileModelGlow</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\ModelGlowParams.h">
-      <Filter>Features\Visuals\ModelGlow</Filter>
     </ClInclude>
     <ClInclude Include="Utils\OptionalPointee.h">
       <Filter>Utils</Filter>
@@ -1365,27 +1314,6 @@
     </ClInclude>
     <ClInclude Include="CS2\Classes\Entities\C_CSGO_PreviewPlayer.h">
       <Filter>CS2\Classes\Entities</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\Preview\BaseEntityForModelGlowPreview.h">
-      <Filter>Features\Visuals\ModelGlow\Preview</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\Preview\PlayerControllerForModelGlowPreview.h">
-      <Filter>Features\Visuals\ModelGlow\Preview</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\Preview\PlayerModelGlowPreview.h">
-      <Filter>Features\Visuals\ModelGlow\Preview</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\Preview\PlayerModelGlowPreviewColorMode.h">
-      <Filter>Features\Visuals\ModelGlow\Preview</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\Preview\PlayerModelGlowPreviewParams.h">
-      <Filter>Features\Visuals\ModelGlow\Preview</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\Preview\PlayerModelGlowPreviewState.h">
-      <Filter>Features\Visuals\ModelGlow\Preview</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\Preview\PlayerPawnForModelGlowPreview.h">
-      <Filter>Features\Visuals\ModelGlow\Preview</Filter>
     </ClInclude>
     <ClInclude Include="MemoryPatterns\Windows\PortraitWorldPatternsWindows.h">
       <Filter>MemoryPatterns\Windows</Filter>
@@ -1711,23 +1639,11 @@
     <ClInclude Include="Features\Sound\SoundVisualizationConfigVariables.h">
       <Filter>Features\Sound</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\ModelGlowConfigVariables.h">
-      <Filter>Features\Visuals\ModelGlow</Filter>
-    </ClInclude>
     <ClInclude Include="Features\Visuals\OutlineGlow\OutlineGlowConfigVariables.h">
       <Filter>Features\Visuals\OutlineGlow</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\Preview\WeaponModelGlowPreview.h">
-      <Filter>Features\Visuals\ModelGlow\Preview</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\Preview\WeaponModelGlowPreviewState.h">
-      <Filter>Features\Visuals\ModelGlow\Preview</Filter>
-    </ClInclude>
     <ClInclude Include="GameClient\Panorama\Ui3dPanel.h">
       <Filter>GameClient\Panorama</Filter>
-    </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\Preview\EnemyTeam.h">
-      <Filter>Features\Visuals\ModelGlow\Preview</Filter>
     </ClInclude>
     <ClInclude Include="CS2\Panorama\CSlider.h">
       <Filter>CS2\Panorama</Filter>
@@ -1909,9 +1825,6 @@
     <ClInclude Include="Features\Hud\BombPlantAlert\BombPlantAlertState.h">
       <Filter>Features\Hud\BombPlantAlert</Filter>
     </ClInclude>
-    <ClInclude Include="Features\Visuals\ModelGlow\ModelGlowDeactivationFlags.h">
-      <Filter>Features\Visuals\ModelGlow</Filter>
-    </ClInclude>
     <ClInclude Include="Utils\EnumFlags.h">
       <Filter>Utils</Filter>
     </ClInclude>
@@ -1940,12 +1853,6 @@
       <Filter>UI\Panorama\Tabs\VisualsTab</Filter>
     </ClInclude>
     <ClInclude Include="UI\Panorama\Tabs\VisualsTab\PlayerInfoInWorldPlayerPositionArrowColorModeDropdownSelectionChangeHandler.h">
-      <Filter>UI\Panorama\Tabs\VisualsTab</Filter>
-    </ClInclude>
-    <ClInclude Include="UI\Panorama\Tabs\VisualsTab\PlayerModelGlowColorModeDropdownSelectionChangeHandler.h">
-      <Filter>UI\Panorama\Tabs\VisualsTab</Filter>
-    </ClInclude>
-    <ClInclude Include="UI\Panorama\Tabs\VisualsTab\PlayerModelGlowDropdownSelectionChangeHandler.h">
       <Filter>UI\Panorama\Tabs\VisualsTab</Filter>
     </ClInclude>
     <ClInclude Include="UI\Panorama\Tabs\VisualsTab\PlayerOutlineGlowColorModeDropdownSelectionChangeHandler.h">

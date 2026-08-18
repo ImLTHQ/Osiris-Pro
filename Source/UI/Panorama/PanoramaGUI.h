@@ -1,17 +1,9 @@
 #pragma once
 
 #include <CS2/Panorama/CUIPanel.h>
-#include <GameClient/Entities/PreviewPlayer.h>
-#include <Features/Visuals/ModelGlow/Preview/PlayerModelGlowPreview.h>
-#include <Features/Visuals/ModelGlow/Preview/PlayerModelGlowPreviewColorMode.h>
-#include <Features/Visuals/ModelGlow/Preview/WeaponModelGlowPreview.h>
-#include <GameClient/Entities/TeamNumber.h>
 #include <GlobalContext/UnloadFlag.h>
-#include <GameClient/Panorama/PanoramaLabel.h>
 #include <GameClient/Panorama/PanoramaUiEngine.h>
 #include <GameClient/Panorama/PanoramaUiPanel.h>
-#include <GameClient/Panorama/Ui3dPanel.h>
-#include <Utils/StringBuilder.h>
 
 #include "PanoramaCommandDispatcher.h"
 #include "CombatTab.h"
@@ -19,81 +11,6 @@
 #include "SoundTab.h"
 #include "VisualsTab.h"
 #include "Tabs/VisualsTab/ViewmodelModPreviewPanel.h"
-
-template <typename HookContext>
-class PlayerModelGlowPreviewPanel {
-public:
-    PlayerModelGlowPreviewPanel(HookContext& hookContext, cs2::CUIPanel* panel, TeamNumber teamNumber) noexcept
-        : hookContext{hookContext}
-        , panel{panel}
-        , teamNumber{teamNumber}
-    {
-    }
-
-    void update() const noexcept
-    {
-        if (!state().shouldUpdatePanel)
-            return;
-
-        StringBuilderStorage<100> storage;
-        auto builder = storage.builder();
-        builder.put(playerName(), ' ', teamName());
-
-        if (state().colorMode == PlayerModelGlowPreviewColorMode::PlayerOrTeamColor) {
-            if (const auto colorString = colorIndexToString()) {
-                builder.put(" - ");
-                builder.put(colorString);
-            }
-        } else if (state().colorMode == PlayerModelGlowPreviewColorMode::HealthBased) {
-            builder.put(" - ", state().previewPlayerHealth, " HP");
-        }
-
-        labelPanel().setText(builder.cstring());
-    }
-
-private:
-    [[nodiscard]] const char* playerName() const noexcept
-    {
-        switch (state().enemyTeam) {
-        case EnemyTeam::Both: return "Enemy";
-        case EnemyTeam::CT: return teamNumber == TeamNumber::CT ? "Enemy" : "Ally";
-        case EnemyTeam::T: return teamNumber == TeamNumber::TT ? "Enemy" : "Ally";
-        default: return "Player";
-        }
-    }
-
-    [[nodiscard]] const char* teamName() const noexcept
-    {
-        return teamNumber == TeamNumber::TT ? "T" : "CT";
-    }
-
-    [[nodiscard]] auto& state() const noexcept
-    {
-        return hookContext.playerModelGlowPreviewState();
-    }
-
-    [[nodiscard]] decltype(auto) labelPanel() const noexcept
-    {
-        return hookContext.template make<PanoramaUiPanel>(panel).clientPanel().template as<PanoramaLabel>();
-    }
-
-    [[nodiscard]] const char* colorIndexToString() const noexcept
-    {
-        switch (state().previewPlayerColorIndex) {
-        using enum cs2::PlayerColorIndex;
-        case Blue: return "Blue";
-        case Green: return "Green";
-        case Yellow: return "Yellow";
-        case Orange: return "Orange";
-        case Purple: return "Purple";
-        default: return nullptr;
-        }
-    }
-
-    HookContext& hookContext;
-    cs2::CUIPanel* panel;
-    TeamNumber teamNumber;
-};
 
 template <typename HookContext>
 class PanoramaGUI {
@@ -144,8 +61,6 @@ public:
 
         if (const auto guiPanel = mainMenu.findChildInLayoutFile("OsirisMenuTab")) {
             state().guiPanelHandle = guiPanel.getHandle();
-            state().modelGlowPreviewPlayerLabelHandleTT = guiPanel.findChildInLayoutFile("ModelGlowPreviewPlayerTTLabel").getHandle();
-            state().modelGlowPreviewPlayerLabelHandleCT = guiPanel.findChildInLayoutFile("ModelGlowPreviewPlayerCTLabel").getHandle();
             state().viewmodelPreviewPanelHandle = guiPanel.findChildInLayoutFile("ViewmodelPreview").getHandle();
 
             hookContext.template make<CombatTab>().init(guiPanel);
@@ -171,40 +86,20 @@ public:
         hookContext.config().template setVariable<ConfigVariable>(typename ConfigVariable::ValueType{newVariableValue});
     }
 
-    [[nodiscard]] decltype(auto) modelGlowPreviewPanel(const char* panelId) const noexcept
-    {
-        auto&& guiPanel = uiEngine().getPanelFromHandle(state().guiPanelHandle);
-        return guiPanel.findChildInLayoutFile(panelId).clientPanel().template as<Ui3dPanel>();
-    }
-
     void run(UnloadFlag& unloadFlag) const noexcept
     {
         auto&& guiPanel = uiEngine().getPanelFromHandle(state().guiPanelHandle);
         if (!guiPanel)
             return;
 
-        auto&& playerModelGlowPreview = hookContext.template make<PlayerModelGlowPreview>();
-        if (!playerModelGlowPreview.isPreviewPlayerSetTT())
-            playerModelGlowPreview.setPreviewPlayerTT(guiPanel.findChildInLayoutFile("ModelGlowPreviewPlayerTT").clientPanel().template as<Ui3dPanel>().portraitWorld().findPreviewPlayer());
-        if (!playerModelGlowPreview.isPreviewPlayerSetCT())
-            playerModelGlowPreview.setPreviewPlayerCT(guiPanel.findChildInLayoutFile("ModelGlowPreviewPlayerCT").clientPanel().template as<Ui3dPanel>().portraitWorld().findPreviewPlayer());
-
         const auto cmdSymbol = uiEngine().makeSymbol(0, "cmd");
         const auto cmd = guiPanel.getAttributeString(cmdSymbol, "");
         PanoramaCommandDispatcher{cmd, unloadFlag, hookContext}();
         guiPanel.setAttributeString(cmdSymbol, "");
 
-        hookContext.template make<PlayerModelGlowPreview>().update();
-        hookContext.template make<PlayerModelGlowPreview>().hookPreviewPlayersSceneObjectUpdaters();
-
-        hookContext.template make<WeaponModelGlowPreview>().updateSceneObjectUpdaterHooks();
-
         auto&& viewmodelModPreviewPanel = uiEngine().getPanelFromHandle(state().viewmodelPreviewPanelHandle).clientPanel().template as<ViewmodelModPreviewPanel>();
         viewmodelModPreviewPanel.setupPreviewModel();
         viewmodelModPreviewPanel.setFov();
-
-        hookContext.template make<PlayerModelGlowPreviewPanel>(uiEngine().getPanelFromHandle(state().modelGlowPreviewPlayerLabelHandleTT), TeamNumber::TT).update();
-        hookContext.template make<PlayerModelGlowPreviewPanel>(uiEngine().getPanelFromHandle(state().modelGlowPreviewPlayerLabelHandleCT), TeamNumber::CT).update();
     }
 
     void updateFromConfig() noexcept

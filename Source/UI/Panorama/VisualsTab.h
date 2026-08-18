@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Features/Visuals/ModelGlow/ModelGlowState.h>
 #include <Features/Visuals/PlayerInfoInWorld/PlayerStateIcons/PlayerStateIconsToShow.h>
 #include <GameClient/Panorama/PanoramaDropDown.h>
 #include <GameClient/Panorama/Slider.h>
@@ -11,8 +10,6 @@
 #include "Tabs/VisualsTab/PlayerInfoInWorldDropdownSelectionChangeHandler.h"
 #include "Tabs/VisualsTab/PlayerInfoInWorldPlayerHealthColorModeDropdownSelectionChangeHandler.h"
 #include "Tabs/VisualsTab/PlayerInfoInWorldPlayerPositionArrowColorModeDropdownSelectionChangeHandler.h"
-#include "Tabs/VisualsTab/PlayerModelGlowColorModeDropdownSelectionChangeHandler.h"
-#include "Tabs/VisualsTab/PlayerModelGlowDropdownSelectionChangeHandler.h"
 #include "Tabs/VisualsTab/PlayerOutlineGlowColorModeDropdownSelectionChangeHandler.h"
 #include "Tabs/VisualsTab/PlayerOutlineGlowDropdownSelectionChangeHandler.h"
 
@@ -27,7 +24,6 @@ public:
     void init(auto&& guiPanel) const noexcept
     {
         initPlayerInfoInWorldTab(guiPanel);
-        initModelGlowTab(guiPanel);
         initOutlineGlowTab(guiPanel);
         initViewmodelTab(guiPanel);
     }
@@ -36,7 +32,6 @@ public:
     {
         updatePlayerInfoInWorldTab(mainMenu);
         updateOutlineGlowTab(mainMenu);
-        updateModelGlowTab(mainMenu);
         updateViewmodelTab(mainMenu);
     }
 
@@ -56,37 +51,6 @@ private:
         initDropDown<OnOffDropdownSelectionChangeHandler<HookContext, player_info_vars::BlindedIconEnabled>>(guiPanel, "player_info_blinded");
         initDropDown<OnOffDropdownSelectionChangeHandler<HookContext, player_info_vars::BombCarrierIconEnabled>>(guiPanel, "player_info_bomb_carrier");
         initDropDown<OnOffDropdownSelectionChangeHandler<HookContext, player_info_vars::BombPlantIconEnabled>>(guiPanel, "player_info_bomb_planting");
-    }
-
-    void initModelGlowTab(auto&& guiPanel) const
-    {
-        initDropDown<OnOffDropdownSelectionChangeHandler<HookContext, model_glow_vars::Enabled>>(guiPanel, "model_glow_enable");
-        initDropDown<PlayerModelGlowDropdownSelectionChangeHandler<HookContext>>(guiPanel, "player_model_glow");
-        initDropDown<PlayerModelGlowColorModeDropdownSelectionChangeHandler<HookContext>>(guiPanel, "player_model_glow_color");
-        initDropDown<OnOffDropdownSelectionChangeHandler<HookContext, model_glow_vars::GlowWeapons>>(guiPanel, "weapon_model_glow");
-        initDropDown<OnOffDropdownSelectionChangeHandler<HookContext, model_glow_vars::GlowDroppedBomb>>(guiPanel, "dropped_bomb_model_glow");
-        initDropDown<OnOffDropdownSelectionChangeHandler<HookContext, model_glow_vars::GlowTickingBomb>>(guiPanel, "ticking_bomb_model_glow");
-        initDropDown<OnOffDropdownSelectionChangeHandler<HookContext, model_glow_vars::GlowDefuseKits>>(guiPanel, "defuse_kit_model_glow");
-        initDropDown<OnOffDropdownSelectionChangeHandler<HookContext, model_glow_vars::GlowGrenadeProjectiles>>(guiPanel, "grenade_proj_model_glow");
-
-        registerHueSliderUpdateHandler<model_glow_vars::PlayerBlueHue, "player_model_glow_blue_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::PlayerGreenHue, "player_model_glow_green_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::PlayerYellowHue, "player_model_glow_yellow_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::PlayerOrangeHue, "player_model_glow_orange_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::PlayerPurpleHue, "player_model_glow_purple_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::TeamTHue, "player_model_glow_t_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::TeamCTHue, "player_model_glow_ct_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::LowHealthHue, "player_model_glow_low_hp_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::HighHealthHue, "player_model_glow_high_hp_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::EnemyHue, "player_model_glow_enemy_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::AllyHue, "player_model_glow_ally_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::MolotovHue, "model_glow_molotov_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::FlashbangHue, "model_glow_flashbang_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::HEGrenadeHue, "model_glow_hegrenade_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::SmokeGrenadeHue, "model_glow_smoke_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::DroppedBombHue, "model_glow_dropped_bomb_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::TickingBombHue, "model_glow_ticking_bomb_hue">(guiPanel);
-        registerHueSliderUpdateHandler<model_glow_vars::DefuseKitHue, "model_glow_defuse_kit_hue">(guiPanel);
     }
 
     void initOutlineGlowTab(auto&& guiPanel) const
@@ -192,36 +156,6 @@ private:
         updateHueSlider<outline_glow_vars::HostageHue>(mainMenu, "outline_glow_hostage_hue");
     }
 
-    void updateModelGlowTab(auto&& mainMenu) const noexcept
-    {
-        setDropDownSelectedIndex(mainMenu, "model_glow_enable", !GET_CONFIG_VAR(model_glow_vars::Enabled));
-        setDropDownSelectedIndex(mainMenu, "player_model_glow", playerModelGlowDropDownIndex());
-        setDropDownSelectedIndex(mainMenu, "player_model_glow_color", static_cast<int>(GET_CONFIG_VAR(model_glow_vars::PlayerGlowColorMode)));
-        setDropDownSelectedIndex(mainMenu, "weapon_model_glow", !GET_CONFIG_VAR(model_glow_vars::GlowWeapons));
-        setDropDownSelectedIndex(mainMenu, "grenade_proj_model_glow", !GET_CONFIG_VAR(model_glow_vars::GlowGrenadeProjectiles));
-        setDropDownSelectedIndex(mainMenu, "dropped_bomb_model_glow", !GET_CONFIG_VAR(model_glow_vars::GlowDroppedBomb));
-        setDropDownSelectedIndex(mainMenu, "ticking_bomb_model_glow", !GET_CONFIG_VAR(model_glow_vars::GlowTickingBomb));
-        setDropDownSelectedIndex(mainMenu, "defuse_kit_model_glow", !GET_CONFIG_VAR(model_glow_vars::GlowDefuseKits));
-        updateHueSlider<model_glow_vars::PlayerBlueHue>(mainMenu, "player_model_glow_blue_hue");
-        updateHueSlider<model_glow_vars::PlayerGreenHue>(mainMenu, "player_model_glow_green_hue");
-        updateHueSlider<model_glow_vars::PlayerYellowHue>(mainMenu, "player_model_glow_yellow_hue");
-        updateHueSlider<model_glow_vars::PlayerOrangeHue>(mainMenu, "player_model_glow_orange_hue");
-        updateHueSlider<model_glow_vars::PlayerPurpleHue>(mainMenu, "player_model_glow_purple_hue");
-        updateHueSlider<model_glow_vars::TeamTHue>(mainMenu, "player_model_glow_t_hue");
-        updateHueSlider<model_glow_vars::TeamCTHue>(mainMenu, "player_model_glow_ct_hue");
-        updateHueSlider<model_glow_vars::LowHealthHue>(mainMenu, "player_model_glow_low_hp_hue");
-        updateHueSlider<model_glow_vars::HighHealthHue>(mainMenu, "player_model_glow_high_hp_hue");
-        updateHueSlider<model_glow_vars::AllyHue>(mainMenu, "player_model_glow_ally_hue");
-        updateHueSlider<model_glow_vars::EnemyHue>(mainMenu, "player_model_glow_enemy_hue");
-        updateHueSlider<model_glow_vars::MolotovHue>(mainMenu, "model_glow_molotov_hue");
-        updateHueSlider<model_glow_vars::FlashbangHue>(mainMenu, "model_glow_flashbang_hue");
-        updateHueSlider<model_glow_vars::HEGrenadeHue>(mainMenu, "model_glow_hegrenade_hue");
-        updateHueSlider<model_glow_vars::SmokeGrenadeHue>(mainMenu, "model_glow_smoke_hue");
-        updateHueSlider<model_glow_vars::DroppedBombHue>(mainMenu, "model_glow_dropped_bomb_hue");
-        updateHueSlider<model_glow_vars::TickingBombHue>(mainMenu, "model_glow_ticking_bomb_hue");
-        updateHueSlider<model_glow_vars::DefuseKitHue>(mainMenu, "model_glow_defuse_kit_hue");
-    }
-
     void updateViewmodelTab(auto&& mainMenu) const noexcept
     {
         setDropDownSelectedIndex(mainMenu, "viewmodel_mod", !GET_CONFIG_VAR(viewmodel_mod_vars::Enabled));
@@ -272,13 +206,6 @@ private:
     {
         if (GET_CONFIG_VAR(outline_glow_vars::GlowPlayers))
             return GET_CONFIG_VAR(outline_glow_vars::GlowOnlyEnemies) ? 0 : 1;
-        return 2;
-    }
-
-    [[nodiscard]] int playerModelGlowDropDownIndex() const noexcept
-    {
-        if (GET_CONFIG_VAR(model_glow_vars::GlowPlayers))
-            return GET_CONFIG_VAR(model_glow_vars::GlowOnlyEnemies) ? 0 : 1;
         return 2;
     }
 

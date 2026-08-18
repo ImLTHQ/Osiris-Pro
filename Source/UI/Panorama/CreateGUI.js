@@ -188,14 +188,6 @@ $.Osiris = (function () {
     });
 
     $.CreatePanel('Label', outlineGlowTabButton, '', { text: "Outline Glow" });
-
-    var modelGlowTabButton = $.CreatePanel('RadioButton', centerContainer, 'model_glow_button', {
-        group: "VisualsNavBar",
-        class: "content-navbar__tabs__btn",
-        onactivate: "$.Osiris.navigateToSubTab('visuals', 'model_glow');"
-    });
-
-    $.CreatePanel('Label', modelGlowTabButton, '', { text: "Model Glow" });
   
     var viewmodelTabButton = $.CreatePanel('RadioButton', centerContainer, 'viewmodel_button', {
         group: "VisualsNavBar",
@@ -340,44 +332,6 @@ $.Osiris = (function () {
 
   var makeFauxItemId = function (defIndex, paintKitId) {
     return (BigInt(0xF000000000000000) | BigInt(paintKitId << 16) | BigInt(defIndex))
-  };
-
-  var createPlayerModelGlowPreview = function (parent, id, labelId, playerModel, itemId) {
-    var container = $.CreatePanel('Panel', parent, '', { style: 'flow-children: none;' });
-    var previewPanel = $.CreatePanel('MapPlayerPreviewPanel', container, id, {
-      map: "ui/buy_menu",
-      camera: "cam_loadoutmenu_ct",
-      "require-composition-layer": true,
-      playermodel: playerModel,
-      playername: "vanity_character",
-      animgraphcharactermode: "buy-menu",
-      player: true,
-      mouse_rotate: false,
-      sync_spawn_addons: true,
-      "transparent-background": true,
-      "pin-fov": "vertical",
-      csm_split_plane0_distance_override: "250.0",
-      style: "y: 5px; vertical-align: top; width: 300px; height: 300px; horizontal-align: center;"
-    });
-    previewPanel.EquipPlayerWithItem(itemId);
-    $.CreatePanel('Label', container, labelId, { style: 'vertical-align: top; horizontal-align: center;' });
-  };
-
-  var createGrenadeModelGlowPreview = function (parent, id, defIndex) {
-    var container = $.CreatePanel('Panel', parent, '', { style: 'width: 80px; overflow: clip;' });
-    var panel = $.CreatePanel('MapItemPreviewPanel', container, id, {
-      map: "ui/xpshop_item",
-      camera: "camera_weapon_4",
-      "require-composition-layer": true,
-      player: false,
-      initial_entity: "item",
-      mouse_rotate: false,
-      sync_spawn_addons: true,
-      "transparent-background": true,
-      "pin-fov": "vertical",
-      style: "x: -10px; horizontal-align: center; width: 200px; height: 80px;"
-    });
-    panel.SetItemItemId(makeFauxItemId(defIndex, 0), {});
   };
 )"
 // split the string literal because MSVC does not support string literals longer than 16k chars - error C2026
@@ -590,110 +544,6 @@ u8R"(
   createYesNoDropDown(hostageOutlineGlow, "Glow Hostages", 'visuals', 'hostage_outline_glow');
   separator(hostageOutlineGlow);
   createHueSlider(hostageOutlineGlow, "Hostage Hue", 'outline_glow_hostage_hue', 0, 359);
-
-  var _modelGlowTab = createSubTab(visuals, 'model_glow');
-  _modelGlowTab.style.overflow = 'squish squish';
-  _modelGlowTab.style.flowChildren = 'right';
-
-  var modelGlowPreview = $.CreatePanel('Panel', _modelGlowTab, '', { style: 'flow-children: down;' });
-  $.CreatePanel('Label', modelGlowPreview, '', { style: 'vertical-align: top; horizontal-align: center; font-size: 40;', text: 'Preview' });
-  var playerModelGlowPreview = $.CreatePanel('Panel', modelGlowPreview, '', { style: 'flow-children: right; margin-top: 20px;' });
-  createPlayerModelGlowPreview(playerModelGlowPreview, 'ModelGlowPreviewPlayerTT', 'ModelGlowPreviewPlayerTTLabel', 'agents/models/tm_professional/tm_professional_varf.vmdl', makeFauxItemId(7, 921));
-  createPlayerModelGlowPreview(playerModelGlowPreview, 'ModelGlowPreviewPlayerCT', 'ModelGlowPreviewPlayerCTLabel', 'agents/models/ctm_st6/ctm_st6_variante.vmdl', makeFauxItemId(9, 819));
-
-  $.CreatePanel('Label', modelGlowPreview, '', { style: 'horizontal-align: center; margin-top: 20px;', text: 'Weapons on the Ground' });
-
-  var weaponModelGlowPreview = $.CreatePanel('Panel', modelGlowPreview, '', { style: 'flow-children: right;' });
-
-  var modelGlowPreviewWeapon = $.CreatePanel('MapItemPreviewPanel', weaponModelGlowPreview, 'ModelGlowPreviewWeapon', {
-    map: "ui/xpshop_item",
-    camera: "camera_weapon_0",
-    "require-composition-layer": true,
-    player: false,
-    initial_entity: "item",
-    mouse_rotate: false,
-    sync_spawn_addons: true,
-    "transparent-background": true,
-    "pin-fov": "vertical",
-    style: "width: 400px; height: 160px;"
-  });
-  modelGlowPreviewWeapon.SetItemItemId(makeFauxItemId(16, 255), {});
-
-  var grenadeModelGlowPreview = $.CreatePanel('Panel', weaponModelGlowPreview, '', { style: 'flow-children: down;' });
-
-  var grenadeModelGlowPreviewRow1 = $.CreatePanel('Panel', grenadeModelGlowPreview, '', { style: 'flow-children: right;' });
-  createGrenadeModelGlowPreview(grenadeModelGlowPreviewRow1, 'ModelGlowPreviewFlashbang', 43);
-  createGrenadeModelGlowPreview(grenadeModelGlowPreviewRow1, 'ModelGlowPreviewHEGrenade', 44);
-
-  var grenadeModelGlowPreviewRow2 = $.CreatePanel('Panel', grenadeModelGlowPreview, '', { style: 'flow-children: right;' });
-  createGrenadeModelGlowPreview(grenadeModelGlowPreviewRow2, 'ModelGlowPreviewSmoke', 45);
-  createGrenadeModelGlowPreview(grenadeModelGlowPreviewRow2, 'ModelGlowPreviewIncendiary', 48);
-
-  var modelGlowTab = $.CreatePanel('Panel', _modelGlowTab, '', { style: 'flow-children: down; margin-right: 40px; overflow: squish scroll;' });
-
-  var modelGlow = createSection(modelGlowTab, 'Model Glow');
-  createOnOffDropDown(modelGlow, "Master Switch", 'visuals', 'model_glow_enable');
-
-  var playerModelGlow = createSection(modelGlowTab, 'Players');
-  createDropDown(playerModelGlow, "Glow Player Models", 'visuals', 'player_model_glow', ['Enemies', 'All Players', 'Off']);
-  separator(playerModelGlow);
-  createDropDown(playerModelGlow, "Player Model Glow Color Mode", 'visuals', 'player_model_glow_color', ['Player / Team Color', 'Team Color', 'Health-based', 'Enemy / Ally']);
-  separator(playerModelGlow);
-  separator(playerModelGlow);
-  createHueSlider(playerModelGlow, "Player Blue Hue", 'player_model_glow_blue_hue', 191, 240);
-  separator(playerModelGlow);
-  createHueSlider(playerModelGlow, "Player Green Hue", 'player_model_glow_green_hue', 110, 140);
-  separator(playerModelGlow);
-  createHueSlider(playerModelGlow, "Player Yellow Hue", 'player_model_glow_yellow_hue', 47, 60);
-  separator(playerModelGlow);
-  createHueSlider(playerModelGlow, "Player Orange Hue", 'player_model_glow_orange_hue', 11, 20);
-  separator(playerModelGlow);
-  createHueSlider(playerModelGlow, "Player Purple Hue", 'player_model_glow_purple_hue', 250, 280);
-  separator(playerModelGlow);
-  separator(playerModelGlow);
-  createHueSlider(playerModelGlow, "Team T Hue", 'player_model_glow_t_hue', 30, 40);
-  separator(playerModelGlow);
-  createHueSlider(playerModelGlow, "Team CT Hue", 'player_model_glow_ct_hue', 210, 230);
-  separator(playerModelGlow);
-  separator(playerModelGlow);
-  createHueSlider(playerModelGlow, "High Health Hue", 'player_model_glow_high_hp_hue', 0, 359);
-  separator(playerModelGlow);
-  createHueSlider(playerModelGlow, "Low Health Hue", 'player_model_glow_low_hp_hue', 0, 359);
-  separator(playerModelGlow);
-  separator(playerModelGlow);
-  createHueSlider(playerModelGlow, "Enemy Hue", 'player_model_glow_enemy_hue', 0, 359);
-  separator(playerModelGlow);
-  createHueSlider(playerModelGlow, "Ally Hue", 'player_model_glow_ally_hue', 0, 359);
-)"
-// split the string literal because MSVC does not support string literals longer than 16k chars - error C2026
-u8R"(
-  var weaponModelGlow = createSection(modelGlowTab, 'Weapons');
-  createYesNoDropDown(weaponModelGlow, "Glow Weapon Models on Ground", 'visuals', 'weapon_model_glow');
-  separator(weaponModelGlow);
-  createYesNoDropDown(weaponModelGlow, "Glow Grenade Projectile Models", 'visuals', 'grenade_proj_model_glow');
-  separator(weaponModelGlow);
-  separator(weaponModelGlow);
-  createHueSlider(weaponModelGlow, "Flashbang Hue", 'model_glow_flashbang_hue', 191, 250);
-  separator(weaponModelGlow);
-  createHueSlider(weaponModelGlow, "HE Grenade Hue", 'model_glow_hegrenade_hue', 300, 359);
-  separator(weaponModelGlow);
-  createHueSlider(weaponModelGlow, "Smoke Grenade Hue", 'model_glow_smoke_hue', 110, 140);
-  separator(weaponModelGlow);
-  createHueSlider(weaponModelGlow, "Molotov / Incendiary Grenade Hue", 'model_glow_molotov_hue', 20, 60);
-
-  var bombModelGlow = createSection(modelGlowTab, 'Bomb & Defuse Kit');
-  createYesNoDropDown(bombModelGlow, "Glow Dropped Bomb Model", 'visuals', 'dropped_bomb_model_glow');
-  separator(bombModelGlow);
-  createYesNoDropDown(bombModelGlow, "Glow Ticking Bomb Model", 'visuals', 'ticking_bomb_model_glow');
-  separator(bombModelGlow);
-  createYesNoDropDown(bombModelGlow, "Glow Defuse Kit Models on Ground", 'visuals', 'defuse_kit_model_glow');
-  separator(bombModelGlow);
-  separator(bombModelGlow);
-  createHueSlider(bombModelGlow, "Dropped Bomb Hue", 'model_glow_dropped_bomb_hue', 0, 359);
-  separator(bombModelGlow);
-  createHueSlider(bombModelGlow, "Ticking Bomb Hue", 'model_glow_ticking_bomb_hue', 0, 359);
-  separator(bombModelGlow);
-  createHueSlider(bombModelGlow, "Defuse Kit Hue", 'model_glow_defuse_kit_hue', 0, 359);
 
   var _viewmodelTab = createSubTab(visuals, 'viewmodel');
   _viewmodelTab.style.overflow = 'squish squish';

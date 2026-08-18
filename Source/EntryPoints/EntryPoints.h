@@ -40,27 +40,8 @@ int SDLHook_PeepEvents(void* events, int numevents, int action, unsigned minType
     hookContext.template make<PanoramaGUI>().onUnload();
     hookContext.hooks().viewRenderHook.uninstall();
     hookContext.template make<ClientModeHooks>().restoreGetViewmodelFov();
-    hookContext.template make<PlayerModelGlowPreview>().onUnload();
-    hookContext.template make<WeaponModelGlowPreview>().onUnload();
     hookContext.template make<NoScopeInaccuracyVis>().onUnload();
     hookContext.template make<BombPlantAlert>().onUnload();
-
-    hookContext.template make<EntitySystem>().forEachNetworkableEntityIdentity([&hookContext](const auto& entityIdentity) {
-        auto&& baseEntity = hookContext.template make<BaseEntity>(static_cast<cs2::C_BaseEntity*>(entityIdentity.entity));
-        const auto entityTypeInfo = baseEntity.classify();
-        if (entityTypeInfo.template is<cs2::C_CSPlayerPawn>())
-            hookContext.template make<ModelGlow>().onUnload()(PlayerModelGlow{hookContext}, baseEntity.template as<PlayerPawn>());
-        else if (entityTypeInfo.template is<cs2::C_C4>())
-            hookContext.template make<ModelGlow>().onUnload()(DroppedBombModelGlow{hookContext}, baseEntity.template as<BaseWeapon>());
-        else if (entityTypeInfo.template is<cs2::CBaseAnimGraph>())
-            hookContext.template make<ModelGlow>().onUnload()(DefuseKitModelGlow{hookContext}, baseEntity);
-        else if (entityTypeInfo.template is<cs2::CPlantedC4>())
-            hookContext.template make<ModelGlow>().onUnload()(TickingBombModelGlow{hookContext}, baseEntity.template as<PlantedC4>());
-        else if (entityTypeInfo.isGrenadeProjectile())
-            hookContext.template make<ModelGlow>().onUnload()(GrenadeProjectileModelGlow{hookContext}, baseEntity);
-        else if (entityTypeInfo.isWeapon())
-            hookContext.template make<ModelGlow>().onUnload()(WeaponModelGlow{hookContext}, baseEntity.template as<BaseWeapon>());
-    });
 }
 
 void ViewRenderHook_onRenderStart(cs2::CViewRender* thisptr) noexcept
@@ -90,31 +71,6 @@ void ViewRenderHook_onRenderStart(cs2::CViewRender* thisptr) noexcept
         unload(hookContext);
         HookContext<GlobalContext>::destroyGlobalContext();
     }  
-}
-
-LINUX_ONLY([[gnu::aligned(8)]]) std::uint64_t PlayerPawn_sceneObjectUpdater(cs2::C_CSPlayerPawn* playerPawn, void* unknown, bool unknownBool) noexcept
-{
-    HookContext<GlobalContext> hookContext;
-    const auto originalReturnValue = hookContext.featuresStates().visualFeaturesStates.modelGlowState.originalPlayerPawnSceneObjectUpdater(playerPawn, unknown, unknownBool);
-
-    auto&& playerPawn_ = hookContext.make<PlayerPawn>(playerPawn);
-    if (auto&& previewPlayer = playerPawn_.template cast<PreviewPlayer>(); !previewPlayer)
-        hookContext.make<ModelGlow>().updateInSceneObjectUpdater()(PlayerModelGlow{hookContext}, playerPawn_, EntityTypeInfo{});
-    else
-        hookContext.make<PlayerModelGlowPreview>().applyPreviewPlayerModelGlow(previewPlayer);
-
-    return originalReturnValue;
-}
-
-LINUX_ONLY([[gnu::aligned(8)]]) std::uint64_t Weapon_sceneObjectUpdater(cs2::C_CSWeaponBase* weapon, void* unknown, bool unknownBool) noexcept
-{
-    HookContext<GlobalContext> hookContext;
-    const auto originalReturnValue = hookContext.featuresStates().visualFeaturesStates.modelGlowState.originalWeaponSceneObjectUpdater(weapon, unknown, unknownBool);
-    if (auto&& c4 = hookContext.make<BaseWeapon>(weapon).template cast<C4>())
-        hookContext.make<ModelGlow>().updateInSceneObjectUpdater()(DroppedBombModelGlow{hookContext}, c4.baseWeapon(), EntityTypeInfo{});
-    else
-        hookContext.make<ModelGlow>().updateInSceneObjectUpdater()(WeaponModelGlow{hookContext}, hookContext.make<BaseWeapon>(weapon), hookContext.make<BaseWeapon>(weapon).baseEntity().classify());
-    return originalReturnValue;
 }
 
 float ClientModeHook_getViewmodelFov(cs2::ClientModeCSNormal* clientMode) noexcept

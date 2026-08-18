@@ -13,7 +13,6 @@
 #include <Features/Sound/Details/FootstepSound.h>
 #include <Features/Sound/Details/WeaponReloadSound.h>
 #include <Features/Sound/Details/WeaponScopeSound.h>
-#include <Features/Visuals/ModelGlow/ModelGlowDeactivationFlags.h>
 #include <Features/Visuals/PlayerInfoInWorld/PlayerStateIcons/PlayerStateIconsToShow.h>
 #include <Hooks/ClientModeHooks.h>
 #include <OutlineGlow/GlowSceneObjects.h>
@@ -95,48 +94,6 @@ public:
             hookContext.soundWatcher().template stopWatching<WeaponScopeSound>();
     }
 
-    ON_CHANGE(model_glow_vars::Enabled)
-    {
-        if (newValue == false)
-            modelGlowDeactivationFlags().set(ModelGlowDeactivationFlags::ModelGlowDeactivating);
-    }
-
-    ON_CHANGE(model_glow_vars::GlowDefuseKits)
-    {
-        if (newValue == false)
-            modelGlowDeactivationFlags().set(ModelGlowDeactivationFlags::DefuseKitModelGlowDeactivating);
-    }
-
-    ON_CHANGE(model_glow_vars::GlowDroppedBomb)
-    {
-        if (newValue == false)
-            modelGlowDeactivationFlags().set(ModelGlowDeactivationFlags::DroppedBombModelGlowDeactivating);
-    }
-
-    ON_CHANGE(model_glow_vars::GlowGrenadeProjectiles)
-    {
-        if (newValue == false)
-            modelGlowDeactivationFlags().set(ModelGlowDeactivationFlags::GrenadeProjectileModelGlowDeactivating);
-    }
-
-    ON_CHANGE(model_glow_vars::GlowPlayers)
-    {
-        if (newValue == false)
-            modelGlowDeactivationFlags().set(ModelGlowDeactivationFlags::PlayerModelGlowDeactivating);
-    }
-
-    ON_CHANGE(model_glow_vars::GlowTickingBomb)
-    {
-        if (newValue == false)
-            modelGlowDeactivationFlags().set(ModelGlowDeactivationFlags::TickingBombModelGlowDeactivating);
-    }
-
-    ON_CHANGE(model_glow_vars::GlowWeapons)
-    {
-        if (newValue == false)
-            modelGlowDeactivationFlags().set(ModelGlowDeactivationFlags::WeaponModelGlowDeactivating);
-    }
-
     ON_CHANGE(outline_glow_vars::Enabled)
     {
         if (newValue == false)
@@ -206,10 +163,5 @@ public:
     #undef ON_CHANGE
 
 private:
-    [[nodiscard]] auto& modelGlowDeactivationFlags() const
-    {
-        return hookContext.featuresStates().visualFeaturesStates.modelGlowState.deactivationFlags;
-    }
-
     HookContext& hookContext;
 };

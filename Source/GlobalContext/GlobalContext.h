@@ -13,12 +13,10 @@
 #include <GameClient/Entities/BaseEntity.h>
 #include <GameClient/Entities/BaseWeapon.h>
 #include <GameClient/Entities/PlayerPawn.h>
-#include <GameClient/Entities/PreviewPlayer.h>
 #include <Features/Combat/SniperRifles/NoScopeInaccuracyVis/NoScopeInaccuracyVis.h>
 #include <Features/Hud/DefusingAlert/DefusingAlert.h>
 #include <Features/Hud/KillfeedPreserver/KillfeedPreserver.h>
 #include <Features/Sound/SoundFeatures.h>
-#include <Features/Visuals/ModelGlow/Preview/PlayerModelGlowPreview.h>
 #include <Features/Visuals/ViewmodelMod/ViewmodelMod.h>
 #include <MemorySearch/PatternNotFoundLogger.h>
 #include <MemoryAllocation/FreeMemoryRegionList.h>

@@ -49,7 +49,7 @@ Cross-platform (Windows, Linux) game hack for **Counter-Strike 2** with GUI and 
 ### Windows (single command)
 
 ```powershell
-& ((& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe")[0]) Osiris.sln /p:Platform=x64 /p:Configuration=Release
+& (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe" | Select-Object -First 1) Osiris.sln /p:Platform=x64 /p:Configuration=Release
 ```
 
 This locates MSBuild automatically (it is not on PATH in a regular PowerShell

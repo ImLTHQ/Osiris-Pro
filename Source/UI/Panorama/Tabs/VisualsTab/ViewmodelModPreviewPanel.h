@@ -1,6 +1,8 @@
 #pragma once
 
 #include <GameClient/Econ/FauxItemId.h>
+#include <GameClient/Panorama/Ui3dPanel.h>
+#include <GameClient/Panorama/UiItem3dPanel.h>
 
 template <typename HookContext>
 class ViewmodelModPreviewPanel {

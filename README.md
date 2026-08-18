@@ -125,7 +125,8 @@ double-click
       already running -> wait for client.dll, then inject immediately
       not running     -> launch CS2 via Steam (steam://rungameid/730)
                          wait for cs2.exe to appear (no timeout, 3 s refresh)
-                         wait for client.dll (no timeout, 3 s refresh), then inject
+                         wait for client.dll (1-minute timeout per attempt,
+                         any-key retry), then inject
   -> inject the embedded Osiris.dll
   -> keep the window open with the result (press any key to close)
 ```
@@ -134,8 +135,9 @@ Early-injection guard (no window-focus check): injection happens only once
 `client.dll` is present in the process — at the "international / China region"
 selection dialog engine2.dll is already loaded but client.dll is not, so that
 phase is naturally excluded. If you get stuck at the region dialog the injector
-waits indefinitely (checking client.dll every 3 seconds) and injects
-automatically once you pick a region and the real game starts.
+polls client.dll every 3 seconds for up to 1 minute, then reports a timeout
+(maximum wait: 1 minute) and offers an any-key retry; it injects automatically
+once you pick a region and the real game starts.
 
 ### Injector developer switches (environment variables, invisible to normal users)
 
@@ -172,8 +174,12 @@ automatically once you pick a region and the real game starts.
 - **No rights, no load**: even when elevated, if `OpenProcess` on the target is
   still denied (protected process etc.) the injector aborts without injecting.
 - **Window persistence**: after finishing, an interactive console stays on
-  "Press any key to continue..."; when output is redirected (CI) the wait is
+  "Press any key to close..."; when output is redirected (CI) the wait is
   skipped automatically.
+- **Client wait timeout**: if `client.dll` does not appear within 60 seconds,
+  the injector reports the timeout (maximum wait per attempt: 1 minute) and
+  offers an any-key retry; without an interactive console (redirected output)
+  it aborts instead of retrying.
 - **Anti-cheat risk**: CS2 ships with VAC and injection can be detected.
   For learning and personal testing only.
 - If the mapped DLL entry point (DllMain) returns `FALSE`, the injector reports

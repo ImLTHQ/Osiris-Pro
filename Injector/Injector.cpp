@@ -45,7 +45,7 @@ bool ConsoleInteractive() {
 void PauseOnExit() {
     if (!ConsoleInteractive())
         return;
-    std::wprintf(L"\nPress any key to continue...");
+    std::wprintf(L"\nPress any key to close...");
     fflush(stdout);
     _getwch();
     fflush(stdout);
@@ -133,6 +133,9 @@ bool LaunchTarget() {
 // Refresh interval for the process/module polling loops below.
 constexpr DWORD kPollIntervalMs = 3000;
 
+// Maximum wait for the game client (client.dll) per attempt: 1 minute.
+constexpr DWORD kClientWaitTimeoutMs = 60 * 1000;
+
 // Polls for the target process until it appears (no timeout - waits forever).
 DWORD WaitForProcess() {
     const DWORD t0 = GetTickCount();
@@ -173,21 +176,33 @@ bool GameEngineLoaded(DWORD pid) {
     return found;
 }
 
-// Waits until the game client (client.dll) is loaded in the target (no
-// timeout - waits forever, polling every kPollIntervalMs).
-void WaitForClientLoaded(DWORD pid) {
-    const DWORD t0 = GetTickCount();
-    DWORD lastStatus = 0;
+// Waits until the game client (client.dll) is loaded in the target. The
+// status line is printed once per attempt and the loop then polls silently
+// every kPollIntervalMs; after kClientWaitTimeoutMs it reports a timeout and
+// offers an any-key retry. Returns true once the client is loaded, false when
+// it gives up (console not interactive, so no retry key can arrive).
+bool WaitForClientLoaded(DWORD pid) {
     for (;;) {
-        if (GameEngineLoaded(pid))
-            return;
-        const DWORD elapsed = GetTickCount() - t0;
-        if (elapsed - lastStatus >= kPollIntervalMs * 2) {
-            lastStatus = elapsed;
-            std::wprintf(L"[*] waiting for the game client (client.dll)... (%u s)\n",
-                         elapsed / 1000);
+        std::wprintf(L"[*] waiting for the game client (client.dll)...\n");
+        const DWORD t0 = GetTickCount();
+        for (;;) {
+            if (GameEngineLoaded(pid))
+                return true;
+            if (GetTickCount() - t0 >= kClientWaitTimeoutMs)
+                break;
+            Sleep(kPollIntervalMs);
         }
-        Sleep(kPollIntervalMs);
+        std::wprintf(L"[!] timeout: client.dll not loaded within %u s "
+                     L"(maximum wait per attempt: 1 minute).\n",
+                     kClientWaitTimeoutMs / 1000);
+        if (!ConsoleInteractive()) {
+            std::wprintf(L"[!] no interactive console for a retry; aborting.\n");
+            return false;
+        }
+        std::wprintf(L"Press any key to retry...");
+        fflush(stdout);
+        _getwch();
+        fflush(stdout);
     }
 }
 
@@ -226,8 +241,10 @@ int wmain() {
     // Both paths: wait until the game client (client.dll) is loaded, then
     // inject immediately - no window-focus gating. At the region-select
     // dialog engine2.dll is loaded but client.dll is not, so injection
-    // naturally happens once the real game starts.
-    WaitForClientLoaded(pid);
+    // naturally happens once the real game starts. The wait times out after
+    // 1 minute and offers an any-key retry.
+    if (!WaitForClientLoaded(pid))
+        return 6;
     std::wprintf(L"[*] game client loaded; injecting immediately.\n");
 
     // ---- dev hook: dry run ----

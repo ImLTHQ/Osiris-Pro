@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <CS2/Classes/Entities/C_CSPlayerPawn.h>
 #include <GameClient/Entities/TeamNumber.h>
 #include <Utils/Optional.h>
 

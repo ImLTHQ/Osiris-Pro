@@ -64,6 +64,14 @@ public:
         return hookContext.patternSearchResults().template get<OffsetToClipAmmo>().of(baseWeapon).toOptional();
     }
 
+    [[nodiscard]] auto paintKit() const noexcept
+    {
+        if constexpr (kWeaponPaintKitOffsetPatternRegistered)
+            return hookContext.patternSearchResults().template get<OffsetToWeaponPaintKit>().of(baseWeapon).toOptional();
+        else
+            return Optional<std::int32_t>{};
+    }
+
     [[nodiscard]] auto getSceneObjectUpdater() const noexcept
     {
         return reinterpret_cast<std::uint64_t(*)(cs2::C_CSWeaponBase*, void*, bool)>(sceneObjectUpdaterHandle() ? sceneObjectUpdaterHandle()->updaterFunction : nullptr);

@@ -10,15 +10,16 @@
 template <typename HookContext>
 class PlayerWeaponIconPanelContext {
 public:
-    PlayerWeaponIconPanelContext(HookContext& hookContext, cs2::CUIPanel* panel, PlayerInfoPanelCacheEntry&) noexcept
+    PlayerWeaponIconPanelContext(HookContext& hookContext, cs2::CUIPanel* panel, PlayerInfoPanelCacheEntry& cache) noexcept
         : _hookContext{hookContext}
         , _panel{panel}
+        , _cache{cache}
     {
     }
 
     [[nodiscard]] decltype(auto) activeWeaponIconPanel() const noexcept
     {
-        return _hookContext.template make<PlayerActiveWeaponIconPanel>(panel().children()[0]);
+        return _hookContext.template make<PlayerActiveWeaponIconPanel>(panel().children()[0], _cache);
     }
 
     [[nodiscard]] decltype(auto) bombIconPanel() const noexcept
@@ -34,4 +35,5 @@ private:
 
     HookContext& _hookContext;
     cs2::CUIPanel* _panel;
+    PlayerInfoPanelCacheEntry& _cache;
 };

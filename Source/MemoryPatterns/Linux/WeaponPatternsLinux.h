@@ -6,6 +6,10 @@
 struct WeaponPatterns {
     [[nodiscard]] static consteval auto addClientPatterns(auto clientPatterns) noexcept
     {
+        // Note: OffsetToWeaponPaintKit is intentionally not registered on Linux.
+        // A Linux signature has not been derived yet, and registering an unverified pattern could
+        // silently match the wrong code. See kWeaponPaintKitOffsetPatternRegistered - on Linux the
+        // active weapon icon falls back to the stock rarity color.
         return clientPatterns
             .template addPattern<OffsetToClipAmmo, CodePattern{"74 ? 8B 87 ? ? ? ? C3"}.add(4).read()>()
             .template addPattern<OffsetToWeaponSceneObjectUpdaterHandle, CodePattern{"48 89 83 ? ? ? ? BE ? ? ? ? 48 89 DF"}.add(3).read()>()

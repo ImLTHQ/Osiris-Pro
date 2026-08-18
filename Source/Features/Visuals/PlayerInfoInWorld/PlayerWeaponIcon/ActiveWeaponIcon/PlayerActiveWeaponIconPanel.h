@@ -8,6 +8,7 @@
 #include <Utils/CString.h>
 #include <Utils/StringBuilder.h>
 #include "PlayerActiveWeaponIconPanelContext.h"
+#include "WeaponRarity/WeaponRarity.h"
 
 template <typename HookContext, typename Context = PlayerActiveWeaponIconPanelContext<HookContext>>
 class PlayerActiveWeaponIconPanel {
@@ -20,12 +21,13 @@ public:
 
     void update(auto&& playerPawn, Visibility bombIconVisibility) const noexcept
     {
-        if (!context.config().template getVariable<player_info_vars::ActiveWeaponIconEnabled>() || (bombIconVisibility == Visibility::Visible && playerPawn.getActiveWeapon().template is<C4>())) {
+        auto&& activeWeapon = playerPawn.getActiveWeapon();
+        if (!context.config().template getVariable<player_info_vars::ActiveWeaponIconEnabled>() || (bombIconVisibility == Visibility::Visible && activeWeapon.template is<C4>())) {
             context.panel().setVisible(false);
             return;
         }
 
-        auto weaponName = CString{playerPawn.getActiveWeapon().getName()};
+        auto weaponName = CString{activeWeapon.getName()};
         if (!weaponName.string)
             return;
         weaponName.skipPrefix("weapon_");
@@ -38,15 +40,28 @@ public:
         const auto weaponIconPath = weaponIconPathBuilder.cstring();
 
         auto&& weaponIconImagePanel = context.panel().clientPanel().template as<ImagePanel>();
-        if (shouldUpdateImagePanel(weaponIconImagePanel, weaponIconPath))
-            weaponIconImagePanel.setImageSvg(weaponIconPath, 24);
+        const auto iconColor = getWeaponIconColor(weaponName, activeWeapon);
+        const bool shouldUpdateImage = shouldUpdateImagePanel(weaponIconImagePanel, weaponIconPath);
+        const bool shouldUpdateColor = context.cache().activeWeaponIconColor(iconColor);
+        if (shouldUpdateImage || shouldUpdateColor)
+            weaponIconImagePanel.setImageSvg(SvgImageParams{.imageUrl = weaponIconPath, .textureHeight = kIconTextureHeight, .fillColor = iconColor});
     }
 
 private:
+    [[nodiscard]] static cs2::Color getWeaponIconColor(auto&& weaponName, auto&& activeWeapon) noexcept
+    {
+        using namespace weapon_rarity;
+        if (isKnifeWeaponName(weaponName.string))
+            return weaponRarityColor(WeaponRarity::Gold);
+        return weaponRarityColor(paintKitRarity(activeWeapon.paintKit().valueOr(0)));
+    }
+
     [[nodiscard]] bool shouldUpdateImagePanel(auto&& imagePanel, const char* newImagePath) const noexcept
     {
         return imagePanel.getImagePath() != newImagePath;
     }
+
+    static constexpr auto kIconTextureHeight{24};
 
     Context context;
 };

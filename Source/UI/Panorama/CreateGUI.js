@@ -448,11 +448,6 @@ u8R"(
   var playerInfo = createSection(playerInfoTab, 'Player Info In World');
   createDropDown(playerInfo, "Master Switch", 'visuals', 'player_information_through_walls', ['Enemies', 'All Players', 'Off']);
 
-  var playerPosition = createSection(playerInfoTab, 'Player Position');
-  createYesNoDropDown(playerPosition, "Show Player Position Arrow", 'visuals', 'player_info_position');
-  separator(playerPosition);
-  createDropDown(playerPosition, "Player Position Arrow Color", 'visuals', 'player_info_position_color', ['Player / Team Color', 'Team Color']);
-
   var playerHealth = createSection(playerInfoTab, 'Player Health');
   createYesNoDropDown(playerHealth, "Show Player Health", 'visuals', 'player_info_health');
   separator(playerHealth);

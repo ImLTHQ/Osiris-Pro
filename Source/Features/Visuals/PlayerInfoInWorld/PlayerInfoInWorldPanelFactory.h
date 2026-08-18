@@ -3,7 +3,6 @@
 #include <CS2/Constants/ColorConstants.h>
 #include <CS2/Panorama/CUIPanel.h>
 #include <GameClient/Panorama/ImagePanel.h>
-#include <GameClient/Panorama/PanoramaTransformations.h>
 #include <Utils/Lvalue.h>
 
 #include "ActiveWeaponAmmo/ActiveWeaponAmmoPanelParams.h"
@@ -11,8 +10,6 @@
 #include "PlayerHealth/PlayerHealthPanel.h"
 #include "PlayerHealth/PlayerHealthPanelParams.h"
 #include "PlayerInfoContainerPanelParams.h"
-#include "PlayerPositionArrow/PlayerPositionArrowPanel.h"
-#include "PlayerPositionArrow/PlayerPositionArrowPanelParams.h"
 #include "PlayerStateIcons/PlayerStateIconsPanel.h"
 #include "PlayerStateIcons/PlayerStateIconsPanelParams.h"
 #include "PlayerWeaponIcon/ActiveWeaponIcon/ActiveWeaponIconPanelParams.h"
@@ -39,21 +36,6 @@ public:
         uiPanel.setTransformOrigin(kTransformOriginX, kTransformOriginY);
         uiPanel.setFlowChildren(kChildrenFlow);
         return utils::lvalue<decltype(uiPanel)>(uiPanel);
-    }
-
-    void createPanel(std::type_identity<PlayerPositionArrowPanel<HookContext>>, auto&& containerPanel) const noexcept
-    {
-        using namespace player_position_arrow_panel_params;
-
-        auto&& imagePanel = hookContext.panelFactory().createImagePanel(containerPanel);
-        imagePanel.setImageSvg(kImageUrl, kTextureHeight);
-
-        auto&& uiPanel = imagePanel.uiPanel();
-        uiPanel.setAlign(kAlignment);
-        uiPanel.setImageShadow(kShadowParams);
-        PanoramaTransformations{
-            hookContext.panoramaTransformFactory().scale(1.0f, -1.0f),
-        }.applyTo(uiPanel);
     }
 
     void createPanel(std::type_identity<PlayerActiveWeaponAmmoPanel<HookContext>>, auto&& containerPanel) const noexcept

@@ -5,6 +5,7 @@
 #include <CS2/Classes/Color.h>
 #include <CS2/Constants/ColorConstants.h>
 #include <Features/Visuals/PlayerInfoInWorld/PlayerInfoInWorldState.h>
+#include <GameClient/Entities/TeamNumber.h>
 #include <GameClient/Panorama/PanoramaLabel.h>
 #include <Utils/StringBuilder.h>
 
@@ -28,6 +29,11 @@ public:
 
         context.panel().setVisible(true);
 
+        auto&& healthIconPanel = context.panel().children()[0];
+
+        if (const auto iconColor = getTeamColor(playerPawn); context.cache().playerHealthIconColor(iconColor))
+            healthIconPanel.setWashColor(iconColor);
+
         auto&& healthValuePanel = context.panel().children()[1];
 
         if (const auto healthTextColor = getColor(playerPawn); context.cache().playerHealthTextColor(healthTextColor))
@@ -38,6 +44,16 @@ public:
     }
 
 private:
+    [[nodiscard]] cs2::Color getTeamColor(auto&& playerPawn) const noexcept
+    {
+        switch (playerPawn.teamNumber()) {
+            using enum TeamNumber;
+            case TT: return cs2::kColorTeamTT;
+            case CT: return cs2::kColorTeamCT;
+            default: return cs2::kColorWhite;
+        }
+    }
+
     [[nodiscard]] cs2::Color getColor(auto&& playerPawn) const noexcept
     {
         if (context.config().template getVariable<player_info_vars::PlayerHealthColorMode>() == PlayerHealthTextColor::HealthBased)

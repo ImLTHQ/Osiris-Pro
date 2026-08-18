@@ -54,8 +54,6 @@ using ConfigVariableTypes = TypeList<
     outline_glow_vars::HostageHue,
     player_info_vars::Enabled,
     player_info_vars::OnlyEnemies,
-    player_info_vars::PlayerPositionArrowEnabled,
-    player_info_vars::PlayerPositionArrowColorMode,
     player_info_vars::PlayerHealthEnabled,
     player_info_vars::PlayerHealthColorMode,
     player_info_vars::ActiveWeaponIconEnabled,

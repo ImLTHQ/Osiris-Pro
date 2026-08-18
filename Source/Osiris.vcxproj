@@ -217,10 +217,6 @@
     <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerInfoPanelCachePerHookState.h" />
     <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerInfoPanelCacheState.h" />
     <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerInfoPanelTypes.h" />
-    <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerPositionArrow\PlayerPositionArrowColorType.h" />
-    <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerPositionArrow\PlayerPositionArrowPanel.h" />
-    <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerPositionArrow\PlayerPositionArrowPanelContext.h" />
-    <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerPositionArrow\PlayerPositionArrowPanelParams.h" />
     <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerStateIcons\PlayerStateIconsPanel.h" />
     <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerStateIcons\PlayerStateIconsPanelContext.h" />
     <ClInclude Include="Features\Visuals\PlayerInfoInWorld\PlayerStateIcons\PlayerStateIconsPanelParams.h" />
@@ -504,7 +500,6 @@
     <ClInclude Include="UI\Panorama\Tabs\VisualsTab\IntSlider.h" />
     <ClInclude Include="UI\Panorama\Tabs\VisualsTab\PlayerInfoInWorldDropdownSelectionChangeHandler.h" />
     <ClInclude Include="UI\Panorama\Tabs\VisualsTab\PlayerInfoInWorldPlayerHealthColorModeDropdownSelectionChangeHandler.h" />
-    <ClInclude Include="UI\Panorama\Tabs\VisualsTab\PlayerInfoInWorldPlayerPositionArrowColorModeDropdownSelectionChangeHandler.h" />
     <ClInclude Include="UI\Panorama\Tabs\VisualsTab\PlayerOutlineGlowColorModeDropdownSelectionChangeHandler.h" />
     <ClInclude Include="UI\Panorama\Tabs\VisualsTab\PlayerOutlineGlowDropdownSelectionChangeHandler.h" />
     <ClInclude Include="UI\Panorama\Tabs\VisualsTab\ViewmodelModPreviewPanel.h" />

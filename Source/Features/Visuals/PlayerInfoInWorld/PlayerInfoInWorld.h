@@ -6,7 +6,6 @@
 
 #include "PlayerInfoInWorldContext.h"
 #include "PlayerInfoInWorldState.h"
-#include "PlayerPositionArrow/PlayerPositionArrowColorType.h"
 #include "PlayerStateIcons/PlayerStateIconsToShow.h"
 
 template <typename HookContext>

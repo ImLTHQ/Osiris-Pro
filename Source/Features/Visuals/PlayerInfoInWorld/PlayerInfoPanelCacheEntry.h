@@ -24,8 +24,8 @@ struct PlayerInfoPanelCacheEntry {
         T cachedValue{};
     };
 
-    Cached<cs2::Color> playerPositionArrowColor{cs2::Color{0, 0, 0, 0}};
     Cached<cs2::Color> playerHealthTextColor{cs2::Color{0, 0, 0, 0}};
+    Cached<cs2::Color> playerHealthIconColor{cs2::Color{0, 0, 0, 0}};
     Cached<int> playerHealth{-1};
     Cached<int> activeWeaponAmmo{-1};
     Cached<float> opacity{-1.0f};

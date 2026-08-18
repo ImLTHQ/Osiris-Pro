@@ -53,8 +53,6 @@ protected:
 
         get<player_info_vars::Enabled>() = true;
         get<player_info_vars::OnlyEnemies>() = true;
-        get<player_info_vars::PlayerPositionArrowEnabled>() = true;
-        get<player_info_vars::PlayerPositionArrowColorMode>() = PlayerPositionArrowColorType::PlayerOrTeamColor;
         get<player_info_vars::PlayerHealthEnabled>() = true;
         get<player_info_vars::PlayerHealthColorMode>() = PlayerHealthTextColor::HealthBased;
         get<player_info_vars::ActiveWeaponIconEnabled>() = true;
